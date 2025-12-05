@@ -1,4 +1,6 @@
 using PetStuff.Catalog.Infrastructure.Extensions;
+using PetStuff.Catalog.Application.Registration;
+
 
 namespace PetStuff.Catalog.Api
 {
@@ -7,6 +9,8 @@ namespace PetStuff.Catalog.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddApplicationServices();
 
             builder.Services.AddInfrastructure(builder.Configuration.GetConnectionString("CatalogDb"));
 

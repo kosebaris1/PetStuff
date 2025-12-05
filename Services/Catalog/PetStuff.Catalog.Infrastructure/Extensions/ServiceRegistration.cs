@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using PetStuff.Catalog.Application.Interfaces.ProductInterface;
 using PetStuff.Catalog.Infrastructure.Context;
+using PetStuff.Catalog.Infrastructure.Repositories.ProductRepository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,8 @@ namespace PetStuff.Catalog.Infrastructure.Extensions
             {
                 options.UseSqlServer(connectionString);
             });
+
+            services.AddScoped<IProductRepository, ProductRepository>();
 
             return services;
         }
