@@ -17,6 +17,7 @@ namespace PetStuff.Catalog.Application.Mapping
             CreateMap<CreateProductCommand, Product>();
             CreateMap<UpdateProductCommand, Product>()
                .ForMember(dest => dest.Images, opt => opt.Ignore());
+
             CreateMap<RemoveProductCommand, Product>().ReverseMap();
         }
     }

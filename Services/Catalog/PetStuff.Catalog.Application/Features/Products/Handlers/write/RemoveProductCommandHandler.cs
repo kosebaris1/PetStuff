@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace PetStuff.Catalog.Application.Features.Products.Handlers.write
 {
-    public class RemoveProductCommandHandler : IRequest<bool>
+    public class RemoveProductCommandHandler : IRequestHandler<RemoveProductCommand,bool>
     {
         private readonly IProductRepository _repository;
 
@@ -28,6 +28,11 @@ namespace PetStuff.Catalog.Application.Features.Products.Handlers.write
             await _repository.DeleteProductAsync(product);
 
             return true;
+        }
+
+        public Task<Unit> Handle(bool request, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
         }
     }
 }
