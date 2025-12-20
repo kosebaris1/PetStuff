@@ -14,6 +14,6 @@ namespace PetStuff.Catalog.Application.Features.Products.Commands
         public RemoveProductCommand(int id)
         {
             Id = id;
-        }
+            }
     }
 }
