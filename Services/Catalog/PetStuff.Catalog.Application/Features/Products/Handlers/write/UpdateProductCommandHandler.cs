@@ -2,11 +2,7 @@
 using MediatR;
 using PetStuff.Catalog.Application.Features.Products.Commands;
 using PetStuff.Catalog.Application.Interfaces.ProductInterface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PetStuff.Catalog.Domain.Entities;
 
 namespace PetStuff.Catalog.Application.Features.Products.Handlers.write
 {
@@ -25,7 +21,26 @@ namespace PetStuff.Catalog.Application.Features.Products.Handlers.write
             var product = await _repository.GetByIdAsync(request.Id);
             if (product == null) return false;
 
-            _mapper.Map(request, product);
+            product.Name = request.Name;
+            product.Description = request.Description;
+            product.Price = request.Price;
+            product.Stock = request.Stock;
+            product.IsActive = request.IsActive;
+            product.CategoryId = request.CategoryId;
+            product.BrandId = request.BrandId;
+            product.UpdatedDate = DateTime.UtcNow;
+
+            // Update images if provided
+            if (request.ImageUrls != null && request.ImageUrls.Any())
+            {
+                product.Images = request.ImageUrls
+                    .Select(url => new ProductImage
+                    {
+                        ImageUrl = url,
+                        IsMain = false,
+                        ProductId = product.Id
+                    }).ToList();
+            }
 
             await _repository.UpdateProductAsync(product);
 
