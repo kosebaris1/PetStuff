@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetStuff.Catalog.Application.Features.Categories.Commands;
 using PetStuff.Catalog.Application.Features.Categories.Queries;
@@ -7,6 +8,7 @@ namespace PetStuff.Catalog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -36,6 +38,7 @@ namespace PetStuff.Catalog.Api.Controllers
 
         // POST: api/categories
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command)
         {
             await _mediator.Send(command);
@@ -44,6 +47,7 @@ namespace PetStuff.Catalog.Api.Controllers
 
         // PUT: api/categories/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryCommand command)
         {
             command.Id = id;
@@ -57,6 +61,7 @@ namespace PetStuff.Catalog.Api.Controllers
 
         // DELETE: api/categories/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _mediator.Send(new RemoveCategoryCommand(id));

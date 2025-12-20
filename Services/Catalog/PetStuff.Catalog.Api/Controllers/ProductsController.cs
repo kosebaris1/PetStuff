@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetStuff.Catalog.Application.Features.Products.Commands;
 using PetStuff.Catalog.Application.Features.Products.Queries;
@@ -7,6 +8,7 @@ namespace PetStuff.Catalog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -52,6 +54,7 @@ namespace PetStuff.Catalog.Api.Controllers
 
         // POST: api/products
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Create([FromBody] CreateProductCommand command)
         {
             await _mediator.Send(command);
@@ -60,6 +63,7 @@ namespace PetStuff.Catalog.Api.Controllers
 
         // PUT: api/products/{id}
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateProductCommand command)
         {
             command.Id = id;
@@ -74,6 +78,7 @@ namespace PetStuff.Catalog.Api.Controllers
 
         // DELETE: api/products/{id}
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _mediator.Send(new RemoveProductCommand(id));
