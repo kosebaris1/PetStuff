@@ -14,8 +14,9 @@ namespace PetStuff.Catalog.Application.Features.Products.Commands
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public int Stock { get; set; }
-
-        public string CategoryName { get; set; } = default!;
-        public string BrandName { get; set; } = default!;
+        public bool IsActive { get; set; } = true;
+        public int CategoryId { get; set; }
+        public int BrandId { get; set; }
+        public List<string>? ImageUrls { get; set; }
     }
 }

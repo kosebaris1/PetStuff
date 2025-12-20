@@ -1,11 +1,7 @@
-﻿using MediatR;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using PetStuff.Catalog.Application.Behaviors;
 
 namespace PetStuff.Catalog.Application.Registration
 {
@@ -14,6 +10,10 @@ namespace PetStuff.Catalog.Application.Registration
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddMediatR(typeof(ApplicationServiceRegistration).Assembly);
+            
+            services.AddValidatorsFromAssembly(typeof(ApplicationServiceRegistration).Assembly);
+            
+            services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             services.AddAutoMapper(typeof(ApplicationServiceRegistration).Assembly);
 

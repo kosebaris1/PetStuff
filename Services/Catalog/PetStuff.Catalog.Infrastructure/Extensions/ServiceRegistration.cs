@@ -1,13 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using PetStuff.Catalog.Application.Interfaces.BrandInterface;
+using PetStuff.Catalog.Application.Interfaces.CategoryInterface;
 using PetStuff.Catalog.Application.Interfaces.ProductInterface;
 using PetStuff.Catalog.Infrastructure.Context;
+using PetStuff.Catalog.Infrastructure.Repositories.BrandRepository;
+using PetStuff.Catalog.Infrastructure.Repositories.CategoryRepository;
 using PetStuff.Catalog.Infrastructure.Repositories.ProductRepository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PetStuff.Catalog.Infrastructure.Extensions
 {
@@ -21,6 +20,8 @@ namespace PetStuff.Catalog.Infrastructure.Extensions
             });
 
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IBrandRepository, BrandRepository>();
 
             return services;
         }
