@@ -8,3 +8,5 @@ namespace PetStuff.Catalog.Application.Features.Brands.Commands
         public string Name { get; set; } = default!;
     }
 }
+
+

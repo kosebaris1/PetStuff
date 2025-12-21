@@ -8,3 +8,5 @@ namespace PetStuff.Catalog.Application.Features.Categories.Commands
         public string? Description { get; set; }
     }
 }
+
+

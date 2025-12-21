@@ -1,10 +1,12 @@
 using Duende.IdentityServer.EntityFramework.DbContexts;
 using Duende.IdentityServer.EntityFramework.Mappers;
+using Duende.IdentityServer.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PetStuff.IdentityServer.Configuration;
 using PetStuff.IdentityServer.Data;
 using PetStuff.IdentityServer.Models;
+using PetStuff.IdentityServer.Services;
 using ConfigurationDbContext = Duende.IdentityServer.EntityFramework.DbContexts.ConfigurationDbContext;
 using PersistedGrantDbContext = Duende.IdentityServer.EntityFramework.DbContexts.PersistedGrantDbContext;
 
@@ -42,6 +44,9 @@ namespace PetStuff.IdentityServer
             })
             .AddEntityFrameworkStores<IdentityServerDbContext>()
             .AddDefaultTokenProviders();
+
+            // Profile Service for adding roles to token
+            builder.Services.AddScoped<IProfileService, ProfileService>();
 
             // Identity Server
             var migrationsAssembly = typeof(Program).Assembly.GetName().Name;
@@ -128,14 +133,36 @@ namespace PetStuff.IdentityServer
                     context.SaveChanges();
                 }
 
-                if (!context.ApiResources.Any())
+                // API Resources - Add new or update UserClaims
+                var existingApiResources = context.ApiResources.Include(r => r.UserClaims).ToList();
+                var configApiResources = IdentityServerConfiguration.GetApiResources().ToList();
+
+                foreach (var configResource in configApiResources)
                 {
-                    foreach (var resource in IdentityServerConfiguration.GetApiResources())
+                    var existingResource = existingApiResources.FirstOrDefault(r => r.Name == configResource.Name);
+                    if (existingResource == null)
                     {
-                        context.ApiResources.Add(resource.ToEntity());
+                        // Add new resource
+                        context.ApiResources.Add(configResource.ToEntity());
                     }
-                    context.SaveChanges();
+                    else
+                    {
+                        // Update UserClaims - Remove old ones and add new ones
+                        var oldClaims = existingResource.UserClaims?.ToList() ?? new List<Duende.IdentityServer.EntityFramework.Entities.ApiResourceClaim>();
+                        context.Set<Duende.IdentityServer.EntityFramework.Entities.ApiResourceClaim>().RemoveRange(oldClaims);
+
+                        foreach (var claim in configResource.UserClaims)
+                        {
+                            context.Set<Duende.IdentityServer.EntityFramework.Entities.ApiResourceClaim>()
+                                .Add(new Duende.IdentityServer.EntityFramework.Entities.ApiResourceClaim
+                                {
+                                    ApiResourceId = existingResource.Id,
+                                    Type = claim
+                                });
+                        }
+                    }
                 }
+                context.SaveChanges();
 
                 // Persisted Grant DbContext
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();

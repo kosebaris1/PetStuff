@@ -15,3 +15,5 @@ namespace PetStuff.Catalog.Application.DTOs
         public List<string> ImageUrls { get; set; } = new();
     }
 }
+
+

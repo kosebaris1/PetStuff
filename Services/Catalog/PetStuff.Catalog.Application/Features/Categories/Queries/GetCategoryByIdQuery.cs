@@ -13,3 +13,5 @@ namespace PetStuff.Catalog.Application.Features.Categories.Queries
         }
     }
 }
+
+

@@ -62,19 +62,23 @@ namespace PetStuff.IdentityServer.Configuration
             {
                 new ApiResource("catalog.api", "Catalog API")
                 {
-                    Scopes = { "catalog.api" }
+                    Scopes = { "catalog.api" },
+                    UserClaims = { "role", "email", "sub", "name" }
                 },
                 new ApiResource("basket.api", "Basket API")
                 {
-                    Scopes = { "basket.api" }
+                    Scopes = { "basket.api" },
+                    UserClaims = { "role", "email", "sub", "name" }
                 },
                 new ApiResource("order.api", "Order API")
                 {
-                    Scopes = { "order.api" }
+                    Scopes = { "order.api" },
+                    UserClaims = { "role", "email", "sub", "name" }
                 },
                 new ApiResource("inventory.api", "Inventory API")
                 {
-                    Scopes = { "inventory.api" }
+                    Scopes = { "inventory.api" },
+                    UserClaims = { "role", "email", "sub", "name" }
                 }
             };
         }

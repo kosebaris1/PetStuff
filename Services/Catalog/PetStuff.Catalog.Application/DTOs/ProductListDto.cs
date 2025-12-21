@@ -12,3 +12,5 @@ namespace PetStuff.Catalog.Application.DTOs
         public string? MainImageUrl { get; set; }
     }
 }
+
+

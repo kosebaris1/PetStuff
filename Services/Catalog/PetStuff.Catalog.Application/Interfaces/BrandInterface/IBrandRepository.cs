@@ -12,3 +12,5 @@ namespace PetStuff.Catalog.Application.Interfaces.BrandInterface
         Task DeleteBrandAsync(Brand brand);
     }
 }
+
+

@@ -12,3 +12,5 @@ namespace PetStuff.Catalog.Application.Interfaces.CategoryInterface
         Task DeleteCategoryAsync(Category category);
     }
 }
+
+

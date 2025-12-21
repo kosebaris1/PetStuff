@@ -23,3 +23,5 @@ namespace PetStuff.Catalog.Application.Features.Categories.Handlers
         }
     }
 }
+
+

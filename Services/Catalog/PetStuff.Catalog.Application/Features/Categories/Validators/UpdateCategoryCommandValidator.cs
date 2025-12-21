@@ -20,3 +20,5 @@ namespace PetStuff.Catalog.Application.Features.Categories.Validators
         }
     }
 }
+
+

@@ -9,3 +9,5 @@ namespace PetStuff.Catalog.Application.DTOs
         public DateTime? UpdatedDate { get; set; }
     }
 }
+
+
