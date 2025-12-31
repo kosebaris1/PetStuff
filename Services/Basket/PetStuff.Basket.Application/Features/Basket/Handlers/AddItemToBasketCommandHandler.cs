@@ -18,13 +18,18 @@ namespace PetStuff.Basket.Application.Features.Basket.Handlers
 
         public async Task<bool> Handle(AddItemToBasketCommand request, CancellationToken cancellationToken)
         {
-            var basket = await _basketRepository.GetBasketAsync(request.UserId);
+            if (string.IsNullOrWhiteSpace(request.UserId))
+            {
+                throw new ArgumentException("User ID is required.", nameof(request.UserId));
+            }
+
+            var basket = await _basketRepository.GetBasketAsync(request.UserId!);
 
             if (basket == null)
             {
                 basket = new BasketEntity
                 {
-                    UserId = request.UserId,
+                    UserId = request.UserId!,
                     Items = new List<BasketItem>()
                 };
             }

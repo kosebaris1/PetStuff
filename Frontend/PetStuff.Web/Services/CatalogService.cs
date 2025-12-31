@@ -1,0 +1,172 @@
+using Microsoft.Extensions.Configuration;
+using PetStuff.Web.Models;
+using System.Net.Http.Headers;
+using System.Text.Json;
+
+namespace PetStuff.Web.Services
+{
+    public class CatalogService : ICatalogService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly IConfiguration _configuration;
+        private readonly JsonSerializerOptions _jsonOptions;
+
+        public CatalogService(HttpClient httpClient, IConfiguration configuration)
+        {
+            _httpClient = httpClient;
+            _configuration = configuration;
+            
+            var baseUrl = _configuration["ApiEndpoints:CatalogApi"] ?? "";
+            if (string.IsNullOrEmpty(baseUrl))
+            {
+                throw new InvalidOperationException("CatalogApi endpoint is not configured in appsettings.json");
+            }
+            
+            _httpClient.BaseAddress = new Uri(baseUrl);
+            _jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+        }
+
+        public async Task<List<ProductListViewModel>> GetProductsAsync(string token)
+        {
+            try
+            {
+                // Clear previous headers and set new authorization
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                
+                var response = await _httpClient.GetAsync("/api/products");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    var products = JsonSerializer.Deserialize<List<ProductListViewModel>>(json, _jsonOptions) ?? new List<ProductListViewModel>();
+                    return products;
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Catalog API Error: {response.StatusCode} - {errorContent}");
+                    // Log error for debugging
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CatalogService.GetProductsAsync Exception: {ex.Message}");
+            }
+            
+            return new List<ProductListViewModel>();
+        }
+
+        public async Task<ProductViewModel?> GetProductByIdAsync(int id, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.GetAsync($"/api/products/{id}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<ProductViewModel>(json, _jsonOptions);
+            }
+            
+            return null;
+        }
+
+        public async Task<List<ProductListViewModel>> GetProductsByCategoryAsync(int categoryId, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.GetAsync($"/api/products/category/{categoryId}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<ProductListViewModel>>(json, _jsonOptions) ?? new List<ProductListViewModel>();
+            }
+            
+            return new List<ProductListViewModel>();
+        }
+
+        public async Task<List<CategoryViewModel>> GetCategoriesAsync(string token)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.GetAsync("/api/categories");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    return JsonSerializer.Deserialize<List<CategoryViewModel>>(json, _jsonOptions) ?? new List<CategoryViewModel>();
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Catalog API Categories Error: {response.StatusCode} - {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CatalogService.GetCategoriesAsync Exception: {ex.Message}");
+            }
+            
+            return new List<CategoryViewModel>();
+        }
+
+        public async Task<List<BrandViewModel>> GetBrandsAsync(string token)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await _httpClient.GetAsync("/api/brands");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+                    return JsonSerializer.Deserialize<List<BrandViewModel>>(json, _jsonOptions) ?? new List<BrandViewModel>();
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Catalog API Brands Error: {response.StatusCode} - {errorContent}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CatalogService.GetBrandsAsync Exception: {ex.Message}");
+            }
+            
+            return new List<BrandViewModel>();
+        }
+
+        public async Task<bool> CreateProductAsync(CreateProductViewModel product, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var json = JsonSerializer.Serialize(product);
+            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/api/products", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UpdateProductAsync(int id, UpdateProductViewModel product, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var json = JsonSerializer.Serialize(product);
+            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"/api/products/{id}", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteProductAsync(int id, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.DeleteAsync($"/api/products/{id}");
+            
+            return response.IsSuccessStatusCode;
+        }
+    }
+}
+

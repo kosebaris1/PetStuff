@@ -15,7 +15,11 @@ namespace PetStuff.Basket.Api
 
             builder.Services.AddInfrastructure(builder.Configuration);
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.PropertyNamingPolicy = null; // PascalCase kullan
+                });
             builder.Services.AddEndpointsApiExplorer();
 
             // JWT Authentication
@@ -64,6 +68,18 @@ namespace PetStuff.Basket.Api
                 });
             });
 
+            // CORS Configuration
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.WithOrigins("https://localhost:7166", "http://localhost:5180")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
@@ -73,6 +89,9 @@ namespace PetStuff.Basket.Api
             }
 
             app.UseHttpsRedirection();
+
+            // CORS middleware'i UseAuthentication'den ÖNCE olmalı
+            app.UseCors("AllowFrontend");
 
             app.UseAuthentication();
             app.UseAuthorization();

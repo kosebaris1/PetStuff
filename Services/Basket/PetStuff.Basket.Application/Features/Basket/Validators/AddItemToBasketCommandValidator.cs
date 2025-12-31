@@ -7,8 +7,9 @@ namespace PetStuff.Basket.Application.Features.Basket.Validators
     {
         public AddItemToBasketCommandValidator()
         {
-            RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("User ID is required.");
+            // UserId controller'da token'dan set edilecek, validation'da kontrol etme
+            // RuleFor(x => x.UserId)
+            //     .NotEmpty().WithMessage("User ID is required.");
 
             RuleFor(x => x.ProductId)
                 .GreaterThan(0).WithMessage("Product ID must be greater than 0.");

@@ -1,0 +1,66 @@
+@model PetStuff.Web.Models.CreateOrderViewModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2>Checkout</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <h4>Shipping Information</h4>
+            <div class="form-group mb-3">
+                <label asp-for="ShippingAddress" class="control-label">Address *</label>
+                <input asp-for="ShippingAddress" class="form-control" />
+                <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="ShippingCity" class="control-label">City</label>
+                        <input asp-for="ShippingCity" class="form-control" />
+                        <span asp-validation-for="ShippingCity" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label asp-for="ShippingZipCode" class="control-label">Zip Code</label>
+                        <input asp-for="ShippingZipCode" class="form-control" />
+                        <span asp-validation-for="ShippingZipCode" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="ShippingCountry" class="control-label">Country</label>
+                <input asp-for="ShippingCountry" class="form-control" />
+                <span asp-validation-for="ShippingCountry" class="text-danger"></span>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success btn-lg">Place Order</button>
+                <a asp-controller="Basket" asp-action="Index" class="btn btn-secondary">Back to Basket</a>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>Order Summary</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Items will be taken from your basket.</p>
+                <p class="text-muted">After placing the order, your basket will be cleared.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

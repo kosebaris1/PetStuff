@@ -45,7 +45,47 @@ namespace PetStuff.Catalog.Infrastructure.Repositories.ProductRepository
 
         public async Task UpdateProductAsync(Product product)
         {
-            _context.Products.Update(product);
+            // Mevcut product'ı ve image'larını yükle
+            var existingProduct = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == product.Id);
+
+            if (existingProduct == null)
+            {
+                throw new InvalidOperationException($"Product with id {product.Id} not found.");
+            }
+
+            // Product bilgilerini güncelle
+            existingProduct.Name = product.Name;
+            existingProduct.Description = product.Description;
+            existingProduct.Price = product.Price;
+            existingProduct.Stock = product.Stock;
+            existingProduct.IsActive = product.IsActive;
+            existingProduct.CategoryId = product.CategoryId;
+            existingProduct.BrandId = product.BrandId;
+            existingProduct.UpdatedDate = product.UpdatedDate;
+
+            // Image'ları güncelle - Önce mevcut image'ları sil
+            if (existingProduct.Images != null && existingProduct.Images.Any())
+            {
+                _context.Set<ProductImage>().RemoveRange(existingProduct.Images);
+            }
+
+            // Yeni image'ları ekle
+            if (product.Images != null && product.Images.Any())
+            {
+                foreach (var image in product.Images)
+                {
+                    existingProduct.Images ??= new List<ProductImage>();
+                    existingProduct.Images.Add(new ProductImage
+                    {
+                        ImageUrl = image.ImageUrl,
+                        IsMain = image.IsMain,
+                        ProductId = existingProduct.Id
+                    });
+                }
+            }
+
             await _context.SaveChangesAsync();
         }
 

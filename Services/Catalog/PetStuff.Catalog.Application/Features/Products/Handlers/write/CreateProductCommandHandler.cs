@@ -26,14 +26,24 @@ namespace PetStuff.Catalog.Application.Features.Products.Handlers.write
         {
             var product = _mapper.Map<Product>(request);
 
-            if (request.ImageUrls != null)
+            // ImageUrls varsa ProductImage listesi oluştur
+            if (request.ImageUrls != null && request.ImageUrls.Any())
             {
-                product.Images = request.ImageUrls
-                    .Select(url => new ProductImage
+                product.Images = new List<ProductImage>();
+                
+                for (int i = 0; i < request.ImageUrls.Count; i++)
+                {
+                    var imageUrl = request.ImageUrls[i]?.Trim();
+                    if (!string.IsNullOrWhiteSpace(imageUrl))
                     {
-                        ImageUrl = url,
-                        IsMain = false
-                    }).ToList();
+                        product.Images.Add(new ProductImage
+                        {
+                            ImageUrl = imageUrl,
+                            IsMain = i == 0 // İlk resmi main yap
+                            // ProductId otomatik set edilecek (EF Core cascade save)
+                        });
+                    }
+                }
             }
 
             await _repository.CreateProductAsync(product);
