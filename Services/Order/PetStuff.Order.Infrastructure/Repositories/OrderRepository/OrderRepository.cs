@@ -34,6 +34,14 @@ namespace PetStuff.Order.Infrastructure.Repositories.OrderRepository
                 .ToListAsync();
         }
 
+        public async Task<List<OrderEntity>> GetAllAsync()
+        {
+            return await _context.Orders
+                .Include(o => o.Items)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
         public async Task<OrderEntity> CreateOrderAsync(OrderEntity order)
         {
             await _context.Orders.AddAsync(order);

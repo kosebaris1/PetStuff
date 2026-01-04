@@ -85,11 +85,11 @@ namespace PetStuff.Web.Controllers
 
             if (order == null)
             {
-                ModelState.AddModelError("", "Failed to create order. Please try again.");
+                ModelState.AddModelError("", "Sipariş oluşturulamadı. Lütfen tekrar deneyin.");
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = $"Order #{order.Id} created successfully!";
+            TempData["SuccessMessage"] = "Siparişiniz alındı! Admin onayından sonra kargoya verilecektir.";
             return RedirectToAction("Details", new { id = order.Id });
         }
     }

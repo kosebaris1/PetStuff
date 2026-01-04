@@ -9,6 +9,7 @@ namespace PetStuff.Order.Application.Interfaces
     {
         Task<OrderEntity?> GetByIdAsync(int id);
         Task<List<OrderEntity>> GetByUserIdAsync(string userId);
+        Task<List<OrderEntity>> GetAllAsync();
         Task<OrderEntity> CreateOrderAsync(OrderEntity order);
         Task<bool> UpdateOrderStatusAsync(int orderId, OrderStatus status);
     }

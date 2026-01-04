@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetStuff.Catalog.Application.Features.Products.Commands;
 using PetStuff.Catalog.Application.Features.Products.Queries;
+using OrderItemStockRequest = PetStuff.Catalog.Application.Features.Products.Commands.OrderItemStockRequest;
 
 namespace PetStuff.Catalog.Api.Controllers
 {
@@ -88,5 +89,46 @@ namespace PetStuff.Catalog.Api.Controllers
 
             return Ok("Product deleted successfully.");
         }
+
+        // POST: api/products/{id}/check-stock
+        [HttpPost("{id}/check-stock")]
+        [Authorize]
+        public async Task<IActionResult> CheckStock(int id, [FromBody] CheckStockRequest request)
+        {
+            var command = new CheckStockCommand
+            {
+                ProductId = id,
+                Quantity = request.Quantity
+            };
+
+            var isAvailable = await _mediator.Send(command);
+            
+            return Ok(new { isAvailable, productId = id, requestedQuantity = request.Quantity });
+        }
+
+        // POST: api/products/reduce-stock-for-order
+        [HttpPost("reduce-stock-for-order")]
+        [Authorize]
+        public async Task<IActionResult> ReduceStockForOrder([FromBody] List<OrderItemStockRequest> items)
+        {
+            var command = new ReduceStockForOrderCommand
+            {
+                Items = items
+            };
+
+            var success = await _mediator.Send(command);
+            
+            if (!success)
+            {
+                return BadRequest("Insufficient stock for one or more products.");
+            }
+
+            return Ok("Stock reduced successfully.");
+        }
+    }
+
+    public class CheckStockRequest
+    {
+        public int Quantity { get; set; }
     }
 }

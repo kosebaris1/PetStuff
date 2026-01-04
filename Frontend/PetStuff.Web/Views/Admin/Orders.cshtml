@@ -1,0 +1,189 @@
+@model List<PetStuff.Web.Models.OrderViewModel>
+@{
+    ViewData["Title"] = "Admin Panel - Order Management";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="bi bi-receipt text-primary"></i> Order Management</h2>
+        <p class="text-muted mb-0">Manage and approve orders</p>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        @if (Model != null && Model.Any())
+        {
+            <div class="table-responsive">
+                <table id="ordersTable" class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Order ID</th>
+                            <th>User ID</th>
+                            <th>Order Date</th>
+                            <th>Total Price</th>
+                            <th>Items</th>
+                            <th>Status</th>
+                            <th>Shipping Address</th>
+                            <th style="width: 250px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in Model)
+                        {
+                            <tr>
+                                <td><strong>#@order.Id</strong></td>
+                                <td><small>@order.UserId</small></td>
+                                <td>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td><span class="fw-bold text-primary">$@order.TotalPrice.ToString("F2")</span></td>
+                                <td>
+                                    <span class="badge bg-info">@order.Items.Count item(s)</span>
+                                </td>
+                                <td>
+                                    @if (order.Status == "Pending")
+                                    {
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="bi bi-clock"></i> Pending
+                                        </span>
+                                    }
+                                    else if (order.Status == "Confirmed")
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-circle"></i> Confirmed
+                                        </span>
+                                    }
+                                    else if (order.Status == "Processing")
+                                    {
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-gear"></i> Processing
+                                        </span>
+                                    }
+                                    else if (order.Status == "Shipped")
+                                    {
+                                        <span class="badge bg-info">
+                                            <i class="bi bi-truck"></i> Shipped
+                                        </span>
+                                    }
+                                    else if (order.Status == "Delivered")
+                                    {
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-check-all"></i> Delivered
+                                        </span>
+                                    }
+                                    else if (order.Status == "Cancelled")
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-x-circle"></i> Cancelled
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    <small>
+                                        @order.ShippingAddress<br />
+                                        @if (!string.IsNullOrEmpty(order.ShippingCity))
+                                        {
+                                            @order.ShippingCity
+                                        }
+                                        @if (!string.IsNullOrEmpty(order.ShippingZipCode))
+                                        {
+                                            <text>@order.ShippingZipCode</text>
+                                        }
+                                    </small>
+                                </td>
+                                <td>
+                                    @if (order.Status == "Pending")
+                                    {
+                                        <div class="btn-group" role="group">
+                                            <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi onaylamak istediğinize emin misiniz? Stok kontrolü yapılacak ve stok yetersizse sipariş iptal edilecektir.');">
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                <input type="hidden" name="status" value="Confirmed" />
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-check-circle"></i> Approve
+                                                </button>
+                                            </form>
+                                            <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi iptal etmek istediğinize emin misiniz?');">
+                                                <input type="hidden" name="id" value="@order.Id" />
+                                                <input type="hidden" name="status" value="Cancelled" />
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-x-circle"></i> Cancel
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (order.Status == "Confirmed")
+                                    {
+                                        <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi kargoya vermek istediğinize emin misiniz?');">
+                                            <input type="hidden" name="id" value="@order.Id" />
+                                            <input type="hidden" name="status" value="Shipped" />
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-info text-white">
+                                                <i class="bi bi-truck"></i> Ship
+                                            </button>
+                                        </form>
+                                    }
+                                    else if (order.Status == "Shipped")
+                                    {
+                                        <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi teslim edildi olarak işaretlemek istediğinize emin misiniz?');">
+                                            <input type="hidden" name="id" value="@order.Id" />
+                                            <input type="hidden" name="status" value="Delivered" />
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="bi bi-check-all"></i> Mark Delivered
+                                            </button>
+                                        </form>
+                                    }
+                                    <a href="@Url.Action("Details", "Orders", new { id = order.Id })" class="btn btn-sm btn-secondary">
+                                        <i class="bi bi-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3 text-muted">No orders found</h4>
+                <p class="text-muted">Orders will appear here when customers place orders.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+}
+
+@section Scripts {
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            if ($('#ordersTable').length) {
+                $('#ordersTable').DataTable({
+                    order: [[0, 'desc']],
+                    pageLength: 10,
+                    language: {
+                        search: "Search:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "No entries found",
+                        infoFiltered: "(filtered from _MAX_ total entries)",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+}
+

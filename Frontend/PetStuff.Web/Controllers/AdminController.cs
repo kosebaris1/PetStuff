@@ -10,10 +10,12 @@ namespace PetStuff.Web.Controllers
     public class AdminController : Controller
     {
         private readonly ICatalogService _catalogService;
+        private readonly IOrderService _orderService;
 
-        public AdminController(ICatalogService catalogService)
+        public AdminController(ICatalogService catalogService, IOrderService orderService)
         {
             _catalogService = catalogService;
+            _orderService = orderService;
         }
 
         public async Task<IActionResult> Index()
@@ -413,6 +415,55 @@ namespace PetStuff.Web.Controllers
                     name = brand.Name
                 }
             });
+        }
+
+        // Orders Management
+        public async Task<IActionResult> Orders()
+        {
+            var token = SessionHelper.GetToken(HttpContext.Session);
+            if (string.IsNullOrEmpty(token))
+            {
+                TempData["ErrorMessage"] = "Please login to access admin panel.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            var orders = await _orderService.GetAllOrdersAsync(token);
+            return View(orders ?? new List<OrderViewModel>());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateOrderStatus(int id, string status)
+        {
+            var token = SessionHelper.GetToken(HttpContext.Session);
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var success = await _orderService.UpdateOrderStatusAsync(id, status, token);
+            
+            if (success)
+            {
+                if (status == "Confirmed")
+                {
+                    TempData["SuccessMessage"] = "Sipariş onaylandı. Kullanıcıya bildirim gönderilecek.";
+                }
+                else if (status == "Cancelled")
+                {
+                    TempData["SuccessMessage"] = "Sipariş iptal edildi.";
+                }
+                else
+                {
+                    TempData["SuccessMessage"] = "Sipariş durumu güncellendi.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Sipariş durumu güncellenemedi. Lütfen tekrar deneyin.";
+            }
+
+            return RedirectToAction("Orders");
         }
     }
 }

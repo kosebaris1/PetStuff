@@ -24,6 +24,9 @@ namespace PetStuff.Order.Infrastructure.Extensions
             // HttpClient for Basket Service
             services.AddHttpClient<IBasketServiceClient, BasketServiceClient>();
 
+            // HttpClient for Catalog Service (for stock management)
+            services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>();
+
             return services;
         }
     }

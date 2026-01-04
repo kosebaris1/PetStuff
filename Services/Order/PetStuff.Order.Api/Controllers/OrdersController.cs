@@ -53,9 +53,24 @@ namespace PetStuff.Order.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] CreateOrderCommand command)
         {
-            // UserId ve Items token'dan ve Basket Service'den otomatik alınacak
-            var order = await _mediator.Send(command);
-            return Ok(order);
+            try
+            {
+                // UserId ve Items token'dan ve Basket Service'den otomatik alınacak
+                var order = await _mediator.Send(command);
+                return Ok(new { 
+                    success = true, 
+                    message = "Siparişiniz alındı. Admin onayından sonra kargoya verilecektir.",
+                    order = order 
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { success = false, message = ex.Message });
+            }
         }
 
         // PUT: api/orders/{id}/status
@@ -64,12 +79,28 @@ namespace PetStuff.Order.Api.Controllers
         public async Task<IActionResult> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusCommand command)
         {
             command.OrderId = id;
-            var result = await _mediator.Send(command);
-            
-            if (!result)
-                return NotFound("Order not found.");
-            
-            return Ok("Order status updated successfully.");
+            try
+            {
+                var result = await _mediator.Send(command);
+                
+                if (!result)
+                    return NotFound("Order not found.");
+                
+                return Ok("Order status updated successfully.");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // GET: api/orders/all (Admin only)
+        [HttpGet("all")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            var allOrders = await _mediator.Send(new GetAllOrdersQuery());
+            return Ok(allOrders);
         }
     }
 }

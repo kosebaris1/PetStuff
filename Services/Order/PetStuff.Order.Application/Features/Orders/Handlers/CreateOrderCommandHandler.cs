@@ -16,17 +16,20 @@ namespace PetStuff.Order.Application.Features.Orders.Handlers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IBasketServiceClient _basketServiceClient;
+        private readonly ICatalogServiceClient _catalogServiceClient;
         private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public CreateOrderCommandHandler(
             IOrderRepository orderRepository,
             IBasketServiceClient basketServiceClient,
+            ICatalogServiceClient catalogServiceClient,
             IMapper mapper,
             IHttpContextAccessor httpContextAccessor)
         {
             _orderRepository = orderRepository;
             _basketServiceClient = basketServiceClient;
+            _catalogServiceClient = catalogServiceClient;
             _mapper = mapper;
             _httpContextAccessor = httpContextAccessor;
         }
@@ -57,7 +60,21 @@ namespace PetStuff.Order.Application.Features.Orders.Handlers
                 throw new InvalidOperationException("Basket is empty or could not be retrieved.");
             }
 
-            // 4. Order oluştur (Basket'ten gelen items ile)
+            // 4. Stok kontrolü yap (SADECE KONTROL, düşürme YOK)
+            var stockCheckItems = basket.Items.Select(item => new OrderItemStockRequest
+            {
+                ProductId = item.ProductId,
+                Quantity = item.Quantity
+            }).ToList();
+
+            var stockAvailable = await _catalogServiceClient.CheckStockAsync(stockCheckItems, token);
+            
+            if (!stockAvailable)
+            {
+                throw new InvalidOperationException("Insufficient stock for one or more products in the basket.");
+            }
+
+            // 5. Order oluştur (Status: Pending - Henüz onaylanmadı, stok düşürülmedi)
             var order = new OrderEntity
             {
                 UserId = userId,
@@ -66,7 +83,7 @@ namespace PetStuff.Order.Application.Features.Orders.Handlers
                 ShippingCity = request.ShippingCity,
                 ShippingCountry = request.ShippingCountry,
                 ShippingZipCode = request.ShippingZipCode,
-                Status = OrderStatus.Pending,
+                Status = OrderStatus.Pending, // Pending - Admin onayı bekliyor
                 Items = basket.Items.Select(item => new OrderItemEntity
                 {
                     ProductId = item.ProductId,
@@ -80,10 +97,10 @@ namespace PetStuff.Order.Application.Features.Orders.Handlers
             // Total price hesapla
             order.TotalPrice = order.Items.Sum(item => item.Price * item.Quantity);
 
-            // 5. Order'ı kaydet
+            // 6. Order'ı kaydet (Stok düşürülmedi, sadece kaydedildi)
             var createdOrder = await _orderRepository.CreateOrderAsync(order);
 
-            // 6. Basket Service'e sepeti temizlemesini söyle
+            // 7. Basket Service'e sepeti temizlemesini söyle
             await _basketServiceClient.ClearBasketAsync(userId, token);
 
             return _mapper.Map<OrderDto>(createdOrder);
