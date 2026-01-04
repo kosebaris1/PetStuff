@@ -12,20 +12,17 @@ namespace PetStuff.Email.Api.Services
     {
         private readonly IConnection _connection;
         private readonly IModel _channel;
-        private readonly IEmailService _emailService;
-        private readonly IIdentityServiceClient _identityServiceClient;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<OrderStatusChangedConsumer> _logger;
         private const string ExchangeName = "order_events";
         private const string QueueName = "order_status_changed";
 
         public OrderStatusChangedConsumer(
             IConfiguration configuration,
-            IEmailService emailService,
-            IIdentityServiceClient identityServiceClient,
+            IServiceScopeFactory serviceScopeFactory,
             ILogger<OrderStatusChangedConsumer> logger)
         {
-            _emailService = emailService;
-            _identityServiceClient = identityServiceClient;
+            _serviceScopeFactory = serviceScopeFactory;
             _logger = logger;
 
             var factory = new ConnectionFactory
@@ -69,7 +66,12 @@ namespace PetStuff.Email.Api.Services
 
                     if (orderEvent != null)
                     {
-                        await ProcessOrderStatusChangedAsync(orderEvent);
+                        using (var scope = _serviceScopeFactory.CreateScope())
+                        {
+                            var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+                            var identityServiceClient = scope.ServiceProvider.GetRequiredService<IIdentityServiceClient>();
+                            await ProcessOrderStatusChangedAsync(orderEvent, emailService, identityServiceClient);
+                        }
                     }
 
                     _channel.BasicAck(ea.DeliveryTag, false);
@@ -91,7 +93,10 @@ namespace PetStuff.Email.Api.Services
             }
         }
 
-        private async Task ProcessOrderStatusChangedAsync(OrderStatusChangedEvent orderEvent)
+        private async Task ProcessOrderStatusChangedAsync(
+            OrderStatusChangedEvent orderEvent, 
+            IEmailService emailService, 
+            IIdentityServiceClient identityServiceClient)
         {
             _logger.LogInformation($"Processing order status changed event: OrderId={orderEvent.OrderId}, Status={orderEvent.Status}, UserId={orderEvent.UserId}");
 
@@ -101,29 +106,40 @@ namespace PetStuff.Email.Api.Services
             // Eğer email yoksa, Identity Server'dan çek
             if (string.IsNullOrEmpty(email))
             {
-                email = await _identityServiceClient.GetUserEmailAsync(orderEvent.UserId);
+                _logger.LogInformation($"Email not in event, fetching from Identity Server for userId: {orderEvent.UserId}");
+                email = await identityServiceClient.GetUserEmailAsync(orderEvent.UserId);
+                _logger.LogInformation($"Email from Identity Server: {(string.IsNullOrEmpty(email) ? "NOT FOUND" : email)}");
             }
 
             if (string.IsNullOrEmpty(email))
             {
-                _logger.LogWarning($"Could not find email for userId: {orderEvent.UserId}");
+                _logger.LogWarning($"Could not find email for userId: {orderEvent.UserId}, skipping email send");
                 return;
             }
 
-            // Status'e göre email gönder
-            switch (orderEvent.Status.ToUpper())
+            // Status'e göre email gönder (ToUpperInvariant kullanarak Türkçe karakter sorununu önle)
+            var normalizedStatus = orderEvent.Status.ToUpperInvariant();
+            _logger.LogInformation($"Sending email for status: {orderEvent.Status} (normalized: {normalizedStatus})");
+
+            switch (normalizedStatus)
             {
                 case "CONFIRMED":
-                    await _emailService.SendOrderConfirmedEmailAsync(email, orderEvent.OrderId);
+                    _logger.LogInformation($"Sending Confirmed email to {email} for order {orderEvent.OrderId}");
+                    await emailService.SendOrderConfirmedEmailAsync(email, orderEvent.OrderId);
+                    _logger.LogInformation($"Confirmed email sent successfully");
                     break;
                 case "SHIPPED":
-                    await _emailService.SendOrderShippedEmailAsync(email, orderEvent.OrderId);
+                    _logger.LogInformation($"Sending Shipped email to {email} for order {orderEvent.OrderId}");
+                    await emailService.SendOrderShippedEmailAsync(email, orderEvent.OrderId);
+                    _logger.LogInformation($"Shipped email sent successfully");
                     break;
                 case "DELIVERED":
-                    await _emailService.SendOrderDeliveredEmailAsync(email, orderEvent.OrderId);
+                    _logger.LogInformation($"Sending Delivered email to {email} for order {orderEvent.OrderId}");
+                    await emailService.SendOrderDeliveredEmailAsync(email, orderEvent.OrderId);
+                    _logger.LogInformation($"Delivered email sent successfully");
                     break;
                 default:
-                    _logger.LogWarning($"Unknown order status: {orderEvent.Status}");
+                    _logger.LogWarning($"Unknown order status: '{orderEvent.Status}' (normalized: '{normalizedStatus}'), cannot send email");
                     break;
             }
         }
