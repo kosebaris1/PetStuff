@@ -88,6 +88,20 @@ namespace PetStuff.Web.Services
             return new List<ProductListViewModel>();
         }
 
+        public async Task<List<ProductListViewModel>> GetProductsByBrandAsync(int brandId, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.GetAsync($"/api/products/brand/{brandId}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<ProductListViewModel>>(json, _jsonOptions) ?? new List<ProductListViewModel>();
+            }
+            
+            return new List<ProductListViewModel>();
+        }
+
         public async Task<List<CategoryViewModel>> GetCategoriesAsync(string token)
         {
             try
@@ -143,7 +157,8 @@ namespace PetStuff.Web.Services
         public async Task<bool> CreateProductAsync(CreateProductViewModel product, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var json = JsonSerializer.Serialize(product);
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
+            var json = JsonSerializer.Serialize(product, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync("/api/products", content);
             
@@ -153,7 +168,8 @@ namespace PetStuff.Web.Services
         public async Task<bool> UpdateProductAsync(int id, UpdateProductViewModel product, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var json = JsonSerializer.Serialize(product);
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
+            var json = JsonSerializer.Serialize(product, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
             var response = await _httpClient.PutAsync($"/api/products/{id}", content);
             
@@ -164,6 +180,94 @@ namespace PetStuff.Web.Services
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.DeleteAsync($"/api/products/{id}");
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<CategoryViewModel?> GetCategoryByIdAsync(int id, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.GetAsync($"/api/categories/{id}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<CategoryViewModel>(json, _jsonOptions);
+            }
+            
+            return null;
+        }
+
+        public async Task<BrandViewModel?> GetBrandByIdAsync(int id, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.GetAsync($"/api/brands/{id}");
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<BrandViewModel>(json, _jsonOptions);
+            }
+            
+            return null;
+        }
+
+        public async Task<bool> CreateCategoryAsync(CreateCategoryViewModel category, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
+            var json = JsonSerializer.Serialize(category, jsonOptions);
+            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/api/categories", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UpdateCategoryAsync(int id, UpdateCategoryViewModel category, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
+            var json = JsonSerializer.Serialize(category, jsonOptions);
+            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"/api/categories/{id}", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteCategoryAsync(int id, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.DeleteAsync($"/api/categories/{id}");
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> CreateBrandAsync(CreateBrandViewModel brand, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
+            var json = JsonSerializer.Serialize(brand, jsonOptions);
+            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync("/api/brands", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> UpdateBrandAsync(int id, UpdateBrandViewModel brand, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
+            var json = JsonSerializer.Serialize(brand, jsonOptions);
+            var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var response = await _httpClient.PutAsync($"/api/brands/{id}", content);
+            
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteBrandAsync(int id, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await _httpClient.DeleteAsync($"/api/brands/{id}");
             
             return response.IsSuccessStatusCode;
         }

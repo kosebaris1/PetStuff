@@ -1,0 +1,42 @@
+@model PetStuff.Web.ViewComponents.NavigationViewModel
+
+@if (Model.Categories.Any() || Model.Brands.Any())
+{
+    @if (Model.Categories.Any())
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-tags"></i> Categories
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+                @foreach (var category in Model.Categories)
+                {
+                    <li>
+                        <a class="dropdown-item" asp-controller="Products" asp-action="Category" asp-route-categoryId="@category.Id">
+                            <i class="bi bi-tag me-2"></i>@category.Name
+                        </a>
+                    </li>
+                }
+            </ul>
+        </li>
+    }
+
+    @if (Model.Brands.Any())
+    {
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="brandDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-stars"></i> Brands
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="brandDropdown">
+                @foreach (var brand in Model.Brands)
+                {
+                    <li>
+                        <a class="dropdown-item" asp-controller="Products" asp-action="Brand" asp-route-brandId="@brand.Id">
+                            <i class="bi bi-star me-2"></i>@brand.Name
+                        </a>
+                    </li>
+                }
+            </ul>
+        </li>
+    }
+}

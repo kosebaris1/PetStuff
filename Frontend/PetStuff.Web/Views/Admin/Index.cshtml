@@ -1,248 +1,495 @@
 @model List<PetStuff.Web.Models.ProductListViewModel>
 @{
-    ViewData["Title"] = "Admin Panel - Product Management";
+    ViewData["Title"] = "Admin Panel - Dashboard";
+    var categories = ViewBag.Categories as List<PetStuff.Web.Models.CategoryViewModel> ?? new List<PetStuff.Web.Models.CategoryViewModel>();
+    var brands = ViewBag.Brands as List<PetStuff.Web.Models.BrandViewModel> ?? new List<PetStuff.Web.Models.BrandViewModel>();
+    var totalProducts = ViewBag.TotalProducts as int? ?? 0;
+    var totalCategories = ViewBag.TotalCategories as int? ?? 0;
+    var totalBrands = ViewBag.TotalBrands as int? ?? 0;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold mb-0"><i class="bi bi-shield-check text-primary"></i> Admin Panel</h2>
-        <p class="text-muted mb-0">Manage your products</p>
-    </div>
-    <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#addProductModal">
-        <i class="bi bi-plus-circle me-2"></i>Add New Product
-    </button>
-</div>
-
-<div class="card shadow-sm">
-    <div class="card-body">
-        @if (Model != null && Model.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th style="width: 80px;">Image</th>
-                            <th>Product Name</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Category</th>
-                            <th>Brand</th>
-                            <th style="width: 200px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var product in Model)
-                        {
-                            <tr>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(product.MainImageUrl))
-                                    {
-                                        <img src="@product.MainImageUrl" alt="@product.Name" class="img-thumbnail rounded" style="width: 60px; height: 60px; object-fit: cover;" />
-                                    }
-                                    else
-                                    {
-                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                            <i class="bi bi-image text-muted"></i>
-                                        </div>
-                                    }
-                                </td>
-                                <td><strong>@product.Name</strong></td>
-                                <td><span class="fw-bold text-primary">$@product.Price.ToString("F2")</span></td>
-                                <td>
-                                    @if (product.Stock > 0)
-                                    {
-                                        <span class="badge bg-success">@product.Stock</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-danger">Out of Stock</span>
-                                    }
-                                </td>
-                                <td><span class="badge bg-secondary">@product.CategoryName</span></td>
-                                <td><span class="badge bg-info">@product.BrandName</span></td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-warning" onclick="loadProductForEdit(@product.Id)">
-                                            <i class="bi bi-pencil"></i> Edit
-                                        </button>
-                                        <form asp-action="DeleteProduct" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete @product.Name?');">
-                                            <input type="hidden" name="id" value="@product.Id" />
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="bi bi-trash"></i> Delete
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="text-center py-5">
-                <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
-                <h4 class="mt-3 text-muted">No products found</h4>
-                <p class="text-muted">Start by adding your first product!</p>
-                <button type="button" class="btn btn-primary btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                    <i class="bi bi-plus-circle me-2"></i>Add Product
-                </button>
-            </div>
-        }
-    </div>
-</div>
-
-<!-- Add Product Modal -->
-<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="addProductModalLabel"><i class="bi bi-plus-circle me-2"></i>Add New Product</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="addProductForm" method="post" asp-action="CreateProduct">
-                @Html.AntiForgeryToken()
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="productName" class="form-label">Product Name *</label>
-                            <input type="text" class="form-control" id="productName" name="Name" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="productPrice" class="form-label">Price *</label>
-                            <input type="number" step="0.01" class="form-control" id="productPrice" name="Price" required>
-                        </div>
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-2">Total Products</h6>
+                        <h2 class="mb-0 fw-bold">@totalProducts</h2>
                     </div>
-                    <div class="mb-3">
-                        <label for="productDescription" class="form-label">Description</label>
-                        <textarea class="form-control" id="productDescription" name="Description" rows="3"></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="productStock" class="form-label">Stock *</label>
-                            <input type="number" class="form-control" id="productStock" name="Stock" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="productCategory" class="form-label">Category *</label>
-                            <select class="form-select" id="productCategory" name="CategoryId" required>
-                                <option value="">Select Category</option>
-                                @if (ViewBag.Categories != null)
-                                {
-                                    @foreach (var category in (List<CategoryViewModel>)ViewBag.Categories)
-                                    {
-                                        <option value="@category.Id">@category.Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="productBrand" class="form-label">Brand *</label>
-                            <select class="form-select" id="productBrand" name="BrandId" required>
-                                <option value="">Select Brand</option>
-                                @if (ViewBag.Brands != null)
-                                {
-                                    @foreach (var brand in (List<BrandViewModel>)ViewBag.Brands)
-                                    {
-                                        <option value="@brand.Id">@brand.Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="productImages" class="form-label">Image URLs (one per line)</label>
-                        <textarea class="form-control" id="productImages" name="ImageUrls" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                    <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                        <i class="bi bi-box-seam fs-1"></i>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle me-2"></i>Add Product
-                    </button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-2">Categories</h6>
+                        <h2 class="mb-0 fw-bold">@totalCategories</h2>
+                    </div>
+                    <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                        <i class="bi bi-tags fs-1"></i>
+                    </div>
                 </div>
-            </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <div class="card-body text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-white-50 mb-2">Brands</h6>
+                        <h2 class="mb-0 fw-bold">@totalBrands</h2>
+                    </div>
+                    <div class="bg-white bg-opacity-25 rounded-circle p-3">
+                        <i class="bi bi-stars fs-1"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Edit Product Modal -->
-<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-warning text-dark">
-                <h5 class="modal-title" id="editProductModalLabel"><i class="bi bi-pencil me-2"></i>Edit Product</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Charts Row -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Products by Category</h5>
             </div>
-            <form id="editProductForm" method="post" asp-action="UpdateProduct">
-                @Html.AntiForgeryToken()
-                <input type="hidden" id="editProductId" name="id" />
-                <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="editProductName" class="form-label">Product Name *</label>
-                            <input type="text" class="form-control" id="editProductName" name="Name" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="editProductPrice" class="form-label">Price *</label>
-                            <input type="number" step="0.01" class="form-control" id="editProductPrice" name="Price" required>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editProductDescription" class="form-label">Description</label>
-                        <textarea class="form-control" id="editProductDescription" name="Description" rows="3"></textarea>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="editProductStock" class="form-label">Stock *</label>
-                            <input type="number" class="form-control" id="editProductStock" name="Stock" required>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="editProductCategory" class="form-label">Category *</label>
-                            <select class="form-select" id="editProductCategory" name="CategoryId" required>
-                                <option value="">Select Category</option>
-                                @if (ViewBag.Categories != null)
-                                {
-                                    @foreach (var category in (List<CategoryViewModel>)ViewBag.Categories)
-                                    {
-                                        <option value="@category.Id">@category.Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="editProductBrand" class="form-label">Brand *</label>
-                            <select class="form-select" id="editProductBrand" name="BrandId" required>
-                                <option value="">Select Brand</option>
-                                @if (ViewBag.Brands != null)
-                                {
-                                    @foreach (var brand in (List<BrandViewModel>)ViewBag.Brands)
-                                    {
-                                        <option value="@brand.Id">@brand.Name</option>
-                                    }
-                                }
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editProductImages" class="form-label">Image URLs (one per line)</label>
-                        <textarea class="form-control" id="editProductImages" name="ImageUrls" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-check-circle me-2"></i>Update Product
-                    </button>
-                </div>
-            </form>
+            <div class="card-body">
+                <canvas id="categoryChart" style="max-height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-pie-chart-fill me-2"></i>Products by Brand</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="brandChart" style="max-height: 300px;"></canvas>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">
+            <i class="bi bi-box-seam me-2"></i>Products
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button" role="tab">
+            <i class="bi bi-tags me-2"></i>Categories
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="brands-tab" data-bs-toggle="tab" data-bs-target="#brands" type="button" role="tab">
+            <i class="bi bi-stars me-2"></i>Brands
+        </button>
+    </li>
+</ul>
+
+<!-- Tab Content -->
+<div class="tab-content" id="adminTabContent">
+    <!-- Products Tab -->
+    <div class="tab-pane fade show active" id="products" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Product Management</h4>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="bi bi-plus-circle me-2"></i>Add New Product
+            </button>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (Model != null && Model.Any())
+                {
+                    <div class="table-responsive">
+                        <table id="productsTable" class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th style="width: 80px;">Image</th>
+                                    <th>Product Name</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Category</th>
+                                    <th>Brand</th>
+                                    <th style="width: 200px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(product.MainImageUrl))
+                                            {
+                                                <img src="@product.MainImageUrl" alt="@product.Name" class="img-thumbnail rounded" style="width: 60px; height: 60px; object-fit: cover;" />
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                                    <i class="bi bi-image text-muted"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td><strong>@product.Name</strong></td>
+                                        <td><span class="fw-bold text-primary">$@product.Price.ToString("F2")</span></td>
+                                        <td>
+                                            @if (product.Stock > 0)
+                                            {
+                                                <span class="badge bg-success">@product.Stock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-danger">Out of Stock</span>
+                                            }
+                                        </td>
+                                        <td><span class="badge bg-secondary">@product.CategoryName</span></td>
+                                        <td><span class="badge bg-info">@product.BrandName</span></td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-warning" onclick="loadProductForEdit(@product.Id)">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                                <form asp-action="DeleteProduct" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete @product.Name?');">
+                                                    <input type="hidden" name="id" value="@product.Id" />
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3 text-muted">No products found</h4>
+                        <p class="text-muted">Start by adding your first product!</p>
+                        <button type="button" class="btn btn-primary btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                            <i class="bi bi-plus-circle me-2"></i>Add Product
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Tab -->
+    <div class="tab-pane fade" id="categories" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Category Management</h4>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                <i class="bi bi-plus-circle me-2"></i>Add New Category
+            </button>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (categories.Any())
+                {
+                    <div class="table-responsive">
+                        <table id="categoriesTable" class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Products</th>
+                                    <th style="width: 200px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var category in categories)
+                                {
+                                    <tr>
+                                        <td><strong>@category.Name</strong></td>
+                                        <td>@(category.Description ?? "-")</td>
+                                        <td><span class="badge bg-primary">@category.ProductCount</span></td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-warning" onclick="loadCategoryForEdit(@category.Id)">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                                <form asp-action="DeleteCategory" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete @category.Name?');">
+                                                    <input type="hidden" name="id" value="@category.Id" />
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-tags text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3 text-muted">No categories found</h4>
+                        <p class="text-muted">Start by adding your first category!</p>
+                        <button type="button" class="btn btn-primary btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                            <i class="bi bi-plus-circle me-2"></i>Add Category
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Brands Tab -->
+    <div class="tab-pane fade" id="brands" role="tabpanel">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">Brand Management</h4>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addBrandModal">
+                <i class="bi bi-plus-circle me-2"></i>Add New Brand
+            </button>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                @if (brands.Any())
+                {
+                    <div class="table-responsive">
+                        <table id="brandsTable" class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Products</th>
+                                    <th style="width: 200px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var brand in brands)
+                                {
+                                    <tr>
+                                        <td><strong>@brand.Name</strong></td>
+                                        <td><span class="badge bg-primary">@brand.ProductCount</span></td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-sm btn-warning" onclick="loadBrandForEdit(@brand.Id)">
+                                                    <i class="bi bi-pencil"></i> Edit
+                                                </button>
+                                                <form asp-action="DeleteBrand" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete @brand.Name?');">
+                                                    <input type="hidden" name="id" value="@brand.Id" />
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="bi bi-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-stars text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3 text-muted">No brands found</h4>
+                        <p class="text-muted">Start by adding your first brand!</p>
+                        <button type="button" class="btn btn-primary btn-lg mt-3" data-bs-toggle="modal" data-bs-target="#addBrandModal">
+                            <i class="bi bi-plus-circle me-2"></i>Add Brand
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Modals -->
+@await Html.PartialAsync("_ProductModals", categories)
+
+<!-- Category Modals -->
+@await Html.PartialAsync("_CategoryModals")
+
+<!-- Brand Modals -->
+@await Html.PartialAsync("_BrandModals")
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+}
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     <script>
+        // Category Chart Data
+        const categoryData = {
+            labels: [@Html.Raw(categories.Any() ? string.Join(",", categories.Select(c => $"'{c.Name.Replace("'", "\\'")}'")) : "")],
+            datasets: [{
+                data: [@(categories.Any() ? string.Join(",", categories.Select(c => c.ProductCount)) : "0")],
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                    '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+                ]
+            }]
+        };
+
+        // Brand Chart Data
+        const brandData = {
+            labels: [@Html.Raw(brands.Any() ? string.Join(",", brands.Select(b => $"'{b.Name.Replace("'", "\\'")}'")) : "")],
+            datasets: [{
+                data: [@(brands.Any() ? string.Join(",", brands.Select(b => b.ProductCount)) : "0")],
+                backgroundColor: [
+                    '#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe',
+                    '#00f2fe', '#43e97b', '#38f9d7', '#fa709a', '#fee140'
+                ]
+            }]
+        };
+
+        // Initialize Charts
+        const categoryCtx = document.getElementById('categoryChart');
+        if (categoryCtx && @(categories.Any().ToString().ToLower())) {
+            new Chart(categoryCtx.getContext('2d'), {
+                type: 'pie',
+                data: categoryData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        const brandCtx = document.getElementById('brandChart');
+        if (brandCtx && @(brands.Any().ToString().ToLower())) {
+            new Chart(brandCtx.getContext('2d'), {
+                type: 'pie',
+                data: brandData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize DataTables
+        $(document).ready(function() {
+            // Products Table
+            if ($('#productsTable').length) {
+                $('#productsTable').DataTable({
+                    order: [[1, 'asc']],
+                    pageLength: 10,
+                    language: {
+                        search: "Search:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "No entries found",
+                        infoFiltered: "(filtered from _MAX_ total entries)",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    }
+                });
+            }
+
+            // Categories Table
+            if ($('#categoriesTable').length) {
+                $('#categoriesTable').DataTable({
+                    order: [[0, 'asc']],
+                    pageLength: 10,
+                    language: {
+                        search: "Search:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "No entries found",
+                        infoFiltered: "(filtered from _MAX_ total entries)",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    }
+                });
+            }
+
+            // Brands Table
+            if ($('#brandsTable').length) {
+                $('#brandsTable').DataTable({
+                    order: [[0, 'asc']],
+                    pageLength: 10,
+                    language: {
+                        search: "Search:",
+                        lengthMenu: "Show _MENU_ entries",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        infoEmpty: "No entries found",
+                        infoFiltered: "(filtered from _MAX_ total entries)",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    }
+                });
+            }
+
+            // Reinitialize DataTables when tab is shown
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var targetTab = $(e.target).data('bs-target');
+                $.fn.dataTable.tables({ visible: true, api: true }).columns.adjust();
+                
+                // Initialize DataTable for the newly shown tab if not already initialized
+                if (targetTab === '#products' && !$.fn.DataTable.isDataTable('#productsTable')) {
+                    $('#productsTable').DataTable({
+                        order: [[1, 'asc']],
+                        pageLength: 10
+                    });
+                } else if (targetTab === '#categories' && !$.fn.DataTable.isDataTable('#categoriesTable')) {
+                    $('#categoriesTable').DataTable({
+                        order: [[0, 'asc']],
+                        pageLength: 10
+                    });
+                } else if (targetTab === '#brands' && !$.fn.DataTable.isDataTable('#brandsTable')) {
+                    $('#brandsTable').DataTable({
+                        order: [[0, 'asc']],
+                        pageLength: 10
+                    });
+                }
+            });
+        });
+
+        // Product Edit
         async function loadProductForEdit(productId) {
             try {
                 const response = await fetch(`/Admin/GetProduct?id=${productId}`);
@@ -269,6 +516,50 @@
                 alert('An error occurred while loading the product');
             }
         }
+
+        // Category Edit
+        async function loadCategoryForEdit(categoryId) {
+            try {
+                const response = await fetch(`/Admin/GetCategory?id=${categoryId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const category = data.category;
+                    document.getElementById('editCategoryId').value = category.id;
+                    document.getElementById('editCategoryName').value = category.name;
+                    document.getElementById('editCategoryDescription').value = category.description || '';
+                    
+                    const editModal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+                    editModal.show();
+                } else {
+                    alert('Failed to load category data');
+                }
+            } catch (error) {
+                console.error('Error loading category:', error);
+                alert('An error occurred while loading the category');
+            }
+        }
+
+        // Brand Edit
+        async function loadBrandForEdit(brandId) {
+            try {
+                const response = await fetch(`/Admin/GetBrand?id=${brandId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const brand = data.brand;
+                    document.getElementById('editBrandId').value = brand.id;
+                    document.getElementById('editBrandName').value = brand.name;
+                    
+                    const editModal = new bootstrap.Modal(document.getElementById('editBrandModal'));
+                    editModal.show();
+                } else {
+                    alert('Failed to load brand data');
+                }
+            } catch (error) {
+                console.error('Error loading brand:', error);
+                alert('An error occurred while loading the brand');
+            }
+        }
     </script>
 }
-

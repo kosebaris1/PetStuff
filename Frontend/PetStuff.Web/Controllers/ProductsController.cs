@@ -56,6 +56,44 @@ namespace PetStuff.Web.Controllers
             var products = await _catalogService.GetProductsByCategoryAsync(categoryId, token);
             return View("Index", products);
         }
+
+        public async Task<IActionResult> Brand(int brandId)
+        {
+            var token = SessionHelper.GetToken(HttpContext.Session);
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var products = await _catalogService.GetProductsByBrandAsync(brandId, token);
+            return View("Index", products);
+        }
+
+        public async Task<IActionResult> Categories()
+        {
+            var token = SessionHelper.GetToken(HttpContext.Session);
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var categories = await _catalogService.GetCategoriesAsync(token);
+            ViewBag.Categories = categories;
+            return View(categories);
+        }
+
+        public async Task<IActionResult> Brands()
+        {
+            var token = SessionHelper.GetToken(HttpContext.Session);
+            if (string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var brands = await _catalogService.GetBrandsAsync(token);
+            ViewBag.Brands = brands;
+            return View(brands);
+        }
     }
 }
 

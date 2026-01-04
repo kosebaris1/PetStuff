@@ -24,16 +24,5 @@ namespace PetStuff.Web.Models
         public string? MainImageUrl { get; set; }
     }
 
-    public class CategoryViewModel
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = default!;
-    }
-
-    public class BrandViewModel
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = default!;
-    }
 }
 
