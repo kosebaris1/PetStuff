@@ -27,6 +27,9 @@ namespace PetStuff.Order.Infrastructure.Extensions
             // HttpClient for Catalog Service (for stock management)
             services.AddHttpClient<ICatalogServiceClient, CatalogServiceClient>();
 
+            // RabbitMQ EventBus
+            services.AddSingleton<PetStuff.Order.Application.Interfaces.IEventBus, RabbitMQEventBus>();
+
             return services;
         }
     }

@@ -11,15 +11,18 @@ namespace PetStuff.Order.Application.Features.Orders.Handlers
         private readonly IOrderRepository _orderRepository;
         private readonly ICatalogServiceClient _catalogServiceClient;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IEventBus _eventBus;
 
         public UpdateOrderStatusCommandHandler(
             IOrderRepository orderRepository,
             ICatalogServiceClient catalogServiceClient,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IEventBus eventBus)
         {
             _orderRepository = orderRepository;
             _catalogServiceClient = catalogServiceClient;
             _httpContextAccessor = httpContextAccessor;
+            _eventBus = eventBus;
         }
 
         public async Task<bool> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
@@ -70,7 +73,15 @@ namespace PetStuff.Order.Application.Features.Orders.Handlers
             }
 
             // Status'u güncelle
-            return await _orderRepository.UpdateOrderStatusAsync(request.OrderId, request.Status);
+            var result = await _orderRepository.UpdateOrderStatusAsync(request.OrderId, request.Status);
+
+            // Eğer status güncellendi ve email gönderilmesi gereken durumlardan biri ise, RabbitMQ'ya mesaj gönder
+            if (result && (request.Status == OrderStatus.Confirmed || request.Status == OrderStatus.Shipped || request.Status == OrderStatus.Delivered))
+            {
+                _eventBus.PublishOrderStatusChangedEvent(request.OrderId, order.UserId, request.Status.ToString());
+            }
+
+            return result;
         }
     }
 }

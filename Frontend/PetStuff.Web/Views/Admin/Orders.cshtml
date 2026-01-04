@@ -10,6 +10,34 @@
     </div>
 </div>
 
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="fw-semibold text-muted">Filter by Status:</span>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary filter-btn active" data-status="">
+                    <i class="bi bi-list-ul"></i> All
+                </button>
+                <button type="button" class="btn btn-outline-warning filter-btn" data-status="Pending">
+                    <i class="bi bi-clock"></i> Pending
+                </button>
+                <button type="button" class="btn btn-outline-success filter-btn" data-status="Confirmed">
+                    <i class="bi bi-check-circle"></i> Confirmed
+                </button>
+                <button type="button" class="btn btn-outline-info filter-btn" data-status="Shipped">
+                    <i class="bi bi-truck"></i> Shipped
+                </button>
+                <button type="button" class="btn btn-outline-success filter-btn" data-status="Delivered">
+                    <i class="bi bi-check-all"></i> Delivered
+                </button>
+                <button type="button" class="btn btn-outline-danger filter-btn" data-status="Cancelled">
+                    <i class="bi bi-x-circle"></i> Cancelled
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow-sm">
     <div class="card-body">
         @if (Model != null && Model.Any())
@@ -31,7 +59,7 @@
                     <tbody>
                         @foreach (var order in Model)
                         {
-                            <tr>
+                            <tr data-status="@order.Status">
                                 <td><strong>#@order.Id</strong></td>
                                 <td><small>@order.UserId</small></td>
                                 <td>@order.OrderDate.ToString("dd.MM.yyyy HH:mm")</td>
@@ -165,7 +193,7 @@
     <script>
         $(document).ready(function() {
             if ($('#ordersTable').length) {
-                $('#ordersTable').DataTable({
+                var table = $('#ordersTable').DataTable({
                     order: [[0, 'desc']],
                     pageLength: 10,
                     language: {
@@ -181,6 +209,33 @@
                             previous: "Previous"
                         }
                     }
+                });
+
+                var selectedStatus = '';
+
+                // Custom filter function for status
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        if (selectedStatus === '') {
+                            return true; // Show all if no filter selected
+                        }
+                        var row = table.row(dataIndex).node();
+                        var rowStatus = $(row).data('status');
+                        return rowStatus === selectedStatus;
+                    }
+                );
+
+                // Status filter functionality
+                $('.filter-btn').on('click', function() {
+                    selectedStatus = $(this).data('status');
+                    
+                    // Remove active class from all buttons
+                    $('.filter-btn').removeClass('active');
+                    // Add active class to clicked button
+                    $(this).addClass('active');
+                    
+                    // Redraw table with new filter
+                    table.draw();
                 });
             }
         });

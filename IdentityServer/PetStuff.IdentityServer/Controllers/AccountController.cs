@@ -138,6 +138,18 @@ namespace PetStuff.IdentityServer.Controllers
             var roles = _roleManager.Roles.Select(r => r.Name).ToList();
             return Ok(roles);
         }
+
+        [HttpGet("user/{userId}/email")]
+        public async Task<IActionResult> GetUserEmail(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            return Ok(new { email = user.Email });
+        }
     }
 
     public class RegisterRequest
