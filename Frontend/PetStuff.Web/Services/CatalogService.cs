@@ -37,7 +37,7 @@ namespace PetStuff.Web.Services
                 _httpClient.DefaultRequestHeaders.Remove("Authorization");
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 
-                var response = await _httpClient.GetAsync("/api/products");
+                var response = await _httpClient.GetAsync("/api/catalog/products");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -63,7 +63,7 @@ namespace PetStuff.Web.Services
         public async Task<ProductViewModel?> GetProductByIdAsync(int id, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"/api/products/{id}");
+            var response = await _httpClient.GetAsync($"/api/catalog/products/{id}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -77,7 +77,7 @@ namespace PetStuff.Web.Services
         public async Task<List<ProductListViewModel>> GetProductsByCategoryAsync(int categoryId, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"/api/products/category/{categoryId}");
+            var response = await _httpClient.GetAsync($"/api/catalog/products/category/{categoryId}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -91,7 +91,7 @@ namespace PetStuff.Web.Services
         public async Task<List<ProductListViewModel>> GetProductsByBrandAsync(int brandId, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"/api/products/brand/{brandId}");
+            var response = await _httpClient.GetAsync($"/api/catalog/products/brand/{brandId}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -107,7 +107,7 @@ namespace PetStuff.Web.Services
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetAsync("/api/categories");
+                var response = await _httpClient.GetAsync("/api/catalog/categories");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -133,7 +133,7 @@ namespace PetStuff.Web.Services
             try
             {
                 _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                var response = await _httpClient.GetAsync("/api/brands");
+                var response = await _httpClient.GetAsync("/api/catalog/brands");
                 
                 if (response.IsSuccessStatusCode)
                 {
@@ -160,7 +160,7 @@ namespace PetStuff.Web.Services
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
             var json = JsonSerializer.Serialize(product, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/api/products", content);
+            var response = await _httpClient.PostAsync("/api/catalog/products", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -171,7 +171,7 @@ namespace PetStuff.Web.Services
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
             var json = JsonSerializer.Serialize(product, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"/api/products/{id}", content);
+            var response = await _httpClient.PutAsync($"/api/catalog/products/{id}", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -179,7 +179,7 @@ namespace PetStuff.Web.Services
         public async Task<bool> DeleteProductAsync(int id, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.DeleteAsync($"/api/products/{id}");
+            var response = await _httpClient.DeleteAsync($"/api/catalog/products/{id}");
             
             return response.IsSuccessStatusCode;
         }
@@ -187,7 +187,7 @@ namespace PetStuff.Web.Services
         public async Task<CategoryViewModel?> GetCategoryByIdAsync(int id, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"/api/categories/{id}");
+            var response = await _httpClient.GetAsync($"/api/catalog/categories/{id}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -201,7 +201,7 @@ namespace PetStuff.Web.Services
         public async Task<BrandViewModel?> GetBrandByIdAsync(int id, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.GetAsync($"/api/brands/{id}");
+            var response = await _httpClient.GetAsync($"/api/catalog/brands/{id}");
             
             if (response.IsSuccessStatusCode)
             {
@@ -218,7 +218,7 @@ namespace PetStuff.Web.Services
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
             var json = JsonSerializer.Serialize(category, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/api/categories", content);
+            var response = await _httpClient.PostAsync("/api/catalog/categories", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -229,7 +229,7 @@ namespace PetStuff.Web.Services
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
             var json = JsonSerializer.Serialize(category, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"/api/categories/{id}", content);
+            var response = await _httpClient.PutAsync($"/api/catalog/categories/{id}", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -237,7 +237,7 @@ namespace PetStuff.Web.Services
         public async Task<bool> DeleteCategoryAsync(int id, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.DeleteAsync($"/api/categories/{id}");
+            var response = await _httpClient.DeleteAsync($"/api/catalog/categories/{id}");
             
             return response.IsSuccessStatusCode;
         }
@@ -248,7 +248,7 @@ namespace PetStuff.Web.Services
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
             var json = JsonSerializer.Serialize(brand, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync("/api/brands", content);
+            var response = await _httpClient.PostAsync("/api/catalog/brands", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -259,7 +259,7 @@ namespace PetStuff.Web.Services
             var jsonOptions = new JsonSerializerOptions { PropertyNamingPolicy = null }; // PascalCase for API
             var json = JsonSerializer.Serialize(brand, jsonOptions);
             var content = new System.Net.Http.StringContent(json, System.Text.Encoding.UTF8, "application/json");
-            var response = await _httpClient.PutAsync($"/api/brands/{id}", content);
+            var response = await _httpClient.PutAsync($"/api/catalog/brands/{id}", content);
             
             return response.IsSuccessStatusCode;
         }
@@ -267,7 +267,7 @@ namespace PetStuff.Web.Services
         public async Task<bool> DeleteBrandAsync(int id, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-            var response = await _httpClient.DeleteAsync($"/api/brands/{id}");
+            var response = await _httpClient.DeleteAsync($"/api/catalog/brands/{id}");
             
             return response.IsSuccessStatusCode;
         }

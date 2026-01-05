@@ -1,0 +1,6 @@
+@PetStuff.ApiGateway_HostAddress = http://localhost:5202
+
+GET {{PetStuff.ApiGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
