@@ -1,7 +1,6 @@
 @model PetStuff.Web.Models.ProductViewModel
 @{
     ViewData["Title"] = Model?.Name ?? "Product Details";
-    var isGuest = User.Identity?.IsAuthenticated != true || string.IsNullOrEmpty(Model?.Name);
 }
 
 <div class="mb-4 fade-in">
@@ -10,23 +9,18 @@
     </a>
 </div>
 
-@if (isGuest)
+@if (Model == null || string.IsNullOrEmpty(Model.Name))
 {
     <div class="card fade-in" style="border-radius: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
         <div class="card-body text-center py-5">
             <div class="mb-4" style="width: 120px; height: 120px; margin: 0 auto; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 35px rgba(99, 102, 241, 0.3);">
-                <i class="bi bi-box-arrow-in-right text-white" style="font-size: 4rem;"></i>
+                <i class="bi bi-exclamation-triangle text-white" style="font-size: 4rem;"></i>
             </div>
-            <h3 class="fw-bold mb-2">Ürün Detaylarını Görmek İçin Giriş Yapın</h3>
-            <p class="text-muted fs-5 mb-4">Ürün detaylarını görmek ve sepete eklemek için lütfen giriş yapın veya kayıt olun.</p>
-            <div class="d-flex gap-3 justify-content-center flex-wrap">
-                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-5 py-3">
-                    <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
-                </a>
-                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary btn-lg px-5 py-3">
-                    <i class="bi bi-person-plus me-2"></i>Kayıt Ol
-                </a>
-            </div>
+            <h3 class="fw-bold mb-2">Ürün Bulunamadı</h3>
+            <p class="text-muted fs-5 mb-4">Aradığınız ürün bulunamadı veya erişilemiyor.</p>
+            <a asp-action="Index" class="btn btn-primary btn-lg px-5 py-3">
+                <i class="bi bi-arrow-left me-2"></i>Ürünlere Dön
+            </a>
         </div>
     </div>
 }

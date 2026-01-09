@@ -9,7 +9,6 @@ namespace PetStuff.Catalog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -19,16 +18,18 @@ namespace PetStuff.Catalog.Api.Controllers
             _mediator = mediator;
         }
 
-        // GET: api/products
+        // GET: api/products - Public endpoint for visitors
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var products = await _mediator.Send(new GetAllProductsQuery());
             return Ok(products);
         }
 
-        // GET: api/products/{id}
+        // GET: api/products/{id} - Public endpoint for visitors
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var product = await _mediator.Send(new GetProductByIdQuery(id));
@@ -37,16 +38,18 @@ namespace PetStuff.Catalog.Api.Controllers
             return Ok(product);
         }
 
-        // GET: api/products/category/{categoryId}
+        // GET: api/products/category/{categoryId} - Public endpoint for visitors
         [HttpGet("category/{categoryId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByCategory(int categoryId)
         {
             var products = await _mediator.Send(new GetProductsByCategoryQuery(categoryId));
             return Ok(products);
         }
 
-        // GET: api/products/brand/{brandId}
+        // GET: api/products/brand/{brandId} - Public endpoint for visitors
         [HttpGet("brand/{brandId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByBrand(int brandId)
         {
             var products = await _mediator.Send(new GetProductsByBrandQuery(brandId));

@@ -29,13 +29,18 @@ namespace PetStuff.Web.Services
             };
         }
 
-        public async Task<List<ProductListViewModel>> GetProductsAsync(string token)
+        public async Task<List<ProductListViewModel>> GetProductsAsync(string? token = null)
         {
             try
             {
-                // Clear previous headers and set new authorization
+                // Clear previous headers
                 _httpClient.DefaultRequestHeaders.Remove("Authorization");
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                
+                // Set authorization only if token is provided
+                if (!string.IsNullOrEmpty(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
                 
                 var response = await _httpClient.GetAsync("/api/catalog/products");
                 
@@ -60,9 +65,14 @@ namespace PetStuff.Web.Services
             return new List<ProductListViewModel>();
         }
 
-        public async Task<ProductViewModel?> GetProductByIdAsync(int id, string token)
+        public async Task<ProductViewModel?> GetProductByIdAsync(int id, string? token = null)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Remove("Authorization");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            
             var response = await _httpClient.GetAsync($"/api/catalog/products/{id}");
             
             if (response.IsSuccessStatusCode)
@@ -74,9 +84,14 @@ namespace PetStuff.Web.Services
             return null;
         }
 
-        public async Task<List<ProductListViewModel>> GetProductsByCategoryAsync(int categoryId, string token)
+        public async Task<List<ProductListViewModel>> GetProductsByCategoryAsync(int categoryId, string? token = null)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Remove("Authorization");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            
             var response = await _httpClient.GetAsync($"/api/catalog/products/category/{categoryId}");
             
             if (response.IsSuccessStatusCode)
@@ -88,9 +103,14 @@ namespace PetStuff.Web.Services
             return new List<ProductListViewModel>();
         }
 
-        public async Task<List<ProductListViewModel>> GetProductsByBrandAsync(int brandId, string token)
+        public async Task<List<ProductListViewModel>> GetProductsByBrandAsync(int brandId, string? token = null)
         {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            _httpClient.DefaultRequestHeaders.Remove("Authorization");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            
             var response = await _httpClient.GetAsync($"/api/catalog/products/brand/{brandId}");
             
             if (response.IsSuccessStatusCode)
@@ -102,11 +122,16 @@ namespace PetStuff.Web.Services
             return new List<ProductListViewModel>();
         }
 
-        public async Task<List<CategoryViewModel>> GetCategoriesAsync(string token)
+        public async Task<List<CategoryViewModel>> GetCategoriesAsync(string? token = null)
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+                
                 var response = await _httpClient.GetAsync("/api/catalog/categories");
                 
                 if (response.IsSuccessStatusCode)
@@ -128,11 +153,16 @@ namespace PetStuff.Web.Services
             return new List<CategoryViewModel>();
         }
 
-        public async Task<List<BrandViewModel>> GetBrandsAsync(string token)
+        public async Task<List<BrandViewModel>> GetBrandsAsync(string? token = null)
         {
             try
             {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+                
                 var response = await _httpClient.GetAsync("/api/catalog/brands");
                 
                 if (response.IsSuccessStatusCode)

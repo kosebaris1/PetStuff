@@ -8,7 +8,6 @@ namespace PetStuff.Catalog.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class CategoriesController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -18,16 +17,18 @@ namespace PetStuff.Catalog.Api.Controllers
             _mediator = mediator;
         }
 
-        // GET: api/categories
+        // GET: api/categories - Public endpoint for visitors
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var categories = await _mediator.Send(new GetAllCategoriesQuery());
             return Ok(categories);
         }
 
-        // GET: api/categories/{id}
+        // GET: api/categories/{id} - Public endpoint for visitors
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
             var category = await _mediator.Send(new GetCategoryByIdQuery(id));
