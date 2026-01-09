@@ -260,6 +260,12 @@
             color: #92400e;
         }
         
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left-color: var(--info-color);
+            color: #1e40af;
+        }
+        
         /* Footer */
         footer {
             background: linear-gradient(135deg, var(--dark-color) 0%, var(--dark-secondary) 100%);
@@ -407,24 +413,30 @@
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark">
-            <div class="container">
-                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-heart-pulse-fill me-2"></i>PetStuff
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
-                                <i class="bi bi-house-door"></i> Home
-                            </a>
-                        </li>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
+    @{
+        var isAccountPage = ViewContext.RouteData.Values["controller"]?.ToString() == "Account" && 
+                           (ViewContext.RouteData.Values["action"]?.ToString() == "Login" || 
+                            ViewContext.RouteData.Values["action"]?.ToString() == "Register");
+    }
+    
+    @if (User.Identity?.IsAuthenticated == true && !isAccountPage)
+    {
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-dark">
+                <div class="container">
+                    <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
+                        <i class="bi bi-heart-pulse-fill me-2"></i>PetStuff
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                    <i class="bi bi-house-door"></i> Home
+                                </a>
+                            </li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
@@ -472,11 +484,8 @@
                                     </a>
                                 </li>
                             }
-                        }
-                    </ul>
-                    <ul class="navbar-nav">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
+                        </ul>
+                        <ul class="navbar-nav">
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-person-circle me-1"></i> @User.Identity.Name
@@ -491,27 +500,15 @@
                                     </li>
                                 </ul>
                             </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Account" asp-action="Login">
-                                    <i class="bi bi-box-arrow-in-right"></i> Login
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-light text-primary px-3 ms-2 rounded-pill" asp-controller="Account" asp-action="Register">
-                                    <i class="bi bi-person-plus"></i> Sign Up
-                                </a>
-                            </li>
-                        }
-                    </ul>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <main role="main" class="pb-3">
-        <div class="container my-4">
+            </nav>
+        </header>
+    }
+    
+    <main role="main" class="pb-3" style="@(isAccountPage ? "min-height: 100vh; display: flex; align-items: center; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 0 !important;" : "")">
+        <div class="container my-4" style="@(isAccountPage ? "width: 100%; max-width: 100%; padding: 2rem 1rem;" : "")">
             @if (TempData["SuccessMessage"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
@@ -533,9 +530,36 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
+            @if (TempData["InfoMessage"] != null)
+            {
+                <div class="alert alert-info alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>@TempData["InfoMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
             @RenderBody()
         </div>
     </main>
+
+    @if (!isAccountPage)
+    {
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-heart-pulse-fill me-2"></i>PetStuff</h5>
+                    <p class="text-muted mb-0">Your trusted partner for all pet needs.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="mb-0">&copy; 2025 PetStuff. All rights reserved.</p>
+                    <a href="#" class="text-light text-decoration-none me-3"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-light text-decoration-none me-3"><i class="bi bi-twitter"></i></a>
+                    <a href="#" class="text-light text-decoration-none"><i class="bi bi-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    }
 
     <!-- Modern Toast Container -->
     <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>

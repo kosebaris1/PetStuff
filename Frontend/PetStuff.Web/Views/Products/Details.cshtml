@@ -1,6 +1,7 @@
 @model PetStuff.Web.Models.ProductViewModel
 @{
-    ViewData["Title"] = Model.Name;
+    ViewData["Title"] = Model?.Name ?? "Product Details";
+    var isGuest = User.Identity?.IsAuthenticated != true || string.IsNullOrEmpty(Model?.Name);
 }
 
 <div class="mb-4 fade-in">
@@ -9,6 +10,28 @@
     </a>
 </div>
 
+@if (isGuest)
+{
+    <div class="card fade-in" style="border-radius: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+        <div class="card-body text-center py-5">
+            <div class="mb-4" style="width: 120px; height: 120px; margin: 0 auto; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 15px 35px rgba(99, 102, 241, 0.3);">
+                <i class="bi bi-box-arrow-in-right text-white" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="fw-bold mb-2">Ürün Detaylarını Görmek İçin Giriş Yapın</h3>
+            <p class="text-muted fs-5 mb-4">Ürün detaylarını görmek ve sepete eklemek için lütfen giriş yapın veya kayıt olun.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg px-5 py-3">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
+                </a>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary btn-lg px-5 py-3">
+                    <i class="bi bi-person-plus me-2"></i>Kayıt Ol
+                </a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
 <div class="row g-4 fade-in">
     <div class="col-md-6">
         <div class="card" style="border-radius: 20px; overflow: hidden;">
@@ -74,40 +97,60 @@
                 
                 <hr style="opacity: 0.2;" />
                 
-                @if (Model.Stock > 0)
+                @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <form id="addToBasketForm" class="mt-4">
-                        <input type="hidden" id="productId" value="@Model.Id" />
-                        <input type="hidden" id="productName" value="@Model.Name" />
-                        <input type="hidden" id="productPrice" value="@Model.Price" />
-                        <input type="hidden" id="productImageUrl" value="@(Model.ImageUrls != null && Model.ImageUrls.Any() ? Model.ImageUrls.First() : "")" />
-                        <div class="mb-4">
-                            <label for="quantity" class="form-label fw-bold mb-3">Quantity</label>
-                            <div class="input-group" style="max-width: 220px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                                <button class="btn btn-outline-secondary border-0" type="button" onclick="document.getElementById('quantity').stepDown()" style="background: #f8fafc;">
-                                    <i class="bi bi-dash-lg"></i>
-                                </button>
-                                <input type="number" id="quantity" name="quantity" class="form-control text-center border-0" value="1" min="1" max="@Model.Stock" style="font-weight: 600; font-size: 1.1rem;" />
-                                <button class="btn btn-outline-secondary border-0" type="button" onclick="document.getElementById('quantity').stepUp()" style="background: #f8fafc;">
-                                    <i class="bi bi-plus-lg"></i>
-                                </button>
+                    @if (Model.Stock > 0)
+                    {
+                        <form id="addToBasketForm" class="mt-4">
+                            <input type="hidden" id="productId" value="@Model.Id" />
+                            <input type="hidden" id="productName" value="@Model.Name" />
+                            <input type="hidden" id="productPrice" value="@Model.Price" />
+                            <input type="hidden" id="productImageUrl" value="@(Model.ImageUrls != null && Model.ImageUrls.Any() ? Model.ImageUrls.First() : "")" />
+                            <div class="mb-4">
+                                <label for="quantity" class="form-label fw-bold mb-3">Quantity</label>
+                                <div class="input-group" style="max-width: 220px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                    <button class="btn btn-outline-secondary border-0" type="button" onclick="document.getElementById('quantity').stepDown()" style="background: #f8fafc;">
+                                        <i class="bi bi-dash-lg"></i>
+                                    </button>
+                                    <input type="number" id="quantity" name="quantity" class="form-control text-center border-0" value="1" min="1" max="@Model.Stock" style="font-weight: 600; font-size: 1.1rem;" />
+                                    <button class="btn btn-outline-secondary border-0" type="button" onclick="document.getElementById('quantity').stepUp()" style="background: #f8fafc;">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100 py-3" style="font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                            <i class="bi bi-cart-plus me-2"></i>Add to Basket
+                            <button type="submit" class="btn btn-success btn-lg w-100 py-3" style="font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                                <i class="bi bi-cart-plus me-2"></i>Add to Basket
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-lg w-100 py-3" disabled style="font-weight: 600; font-size: 1.1rem;">
+                            <i class="bi bi-x-circle me-2"></i>Out of Stock
                         </button>
-                    </form>
+                    }
                 }
                 else
                 {
-                    <button class="btn btn-secondary btn-lg w-100 py-3" disabled style="font-weight: 600; font-size: 1.1rem;">
-                        <i class="bi bi-x-circle me-2"></i>Out of Stock
-                    </button>
+                    <div class="alert alert-info mt-4" style="border-radius: 12px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: none;">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Sepete eklemek için giriş yapın!</strong>
+                        <p class="mb-0 mt-2">Ürünleri sepete eklemek ve satın almak için lütfen giriş yapın veya kayıt olun.</p>
+                    </div>
+                    <div class="d-flex gap-3 mt-3">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg flex-fill py-3" style="font-weight: 600;">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Giriş Yap
+                        </a>
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary btn-lg flex-fill py-3" style="font-weight: 600;">
+                            <i class="bi bi-person-plus me-2"></i>Kayıt Ol
+                        </a>
+                    </div>
                 }
             </div>
         </div>
     </div>
 </div>
+}
 
 @section Scripts {
     <script>

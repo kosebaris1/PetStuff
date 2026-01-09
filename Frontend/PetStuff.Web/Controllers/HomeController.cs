@@ -18,7 +18,7 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        // If user is authenticated, redirect based on role
+        // If user is authenticated, show products
         if (User.Identity?.IsAuthenticated == true)
         {
             if (User.IsInRole("Admin"))
@@ -27,17 +27,15 @@ public class HomeController : Controller
             }
             else
             {
-                return RedirectToAction("Index", "Products");
+                var token = SessionHelper.GetToken(HttpContext.Session);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var products = await _catalogService.GetProductsAsync(token);
+                    ViewBag.Products = products.Take(6).ToList(); // Show first 6 products
+                }
             }
         }
-
-        // Show products even if not logged in (optional)
-        var token = SessionHelper.GetToken(HttpContext.Session);
-        if (!string.IsNullOrEmpty(token))
-        {
-            var products = await _catalogService.GetProductsAsync(token);
-            ViewBag.Products = products.Take(6).ToList(); // Show first 6 products
-        }
+        // Ziyaretçiler için boş liste göster (ürünleri görmek için login olmaları gerektiğini belirtmek için)
         return View();
     }
 

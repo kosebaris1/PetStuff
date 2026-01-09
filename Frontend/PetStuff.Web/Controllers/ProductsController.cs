@@ -6,7 +6,6 @@ using PetStuff.Web.Services;
 
 namespace PetStuff.Web.Controllers
 {
-    [Authorize]
     public class ProductsController : Controller
     {
         private readonly ICatalogService _catalogService;
@@ -16,24 +15,31 @@ namespace PetStuff.Web.Controllers
             _catalogService = catalogService;
         }
 
+        // Public - ziyaretçiler de görebilir
         public async Task<IActionResult> Index()
         {
             var token = SessionHelper.GetToken(HttpContext.Session);
+            
+            // Token yoksa boş liste göster (ziyaretçi modu)
             if (string.IsNullOrEmpty(token))
             {
-                return RedirectToAction("Login", "Account");
+                return View(new List<ProductListViewModel>());
             }
 
             var products = await _catalogService.GetProductsAsync(token);
             return View(products);
         }
 
+        // Public - ziyaretçiler de görebilir (ama token olmadan API'den çekemeyiz)
         public async Task<IActionResult> Details(int id)
         {
             var token = SessionHelper.GetToken(HttpContext.Session);
+            
+            // Token yoksa ziyaretçi modunda göster (ürün detayları olmadan)
             if (string.IsNullOrEmpty(token))
             {
-                return RedirectToAction("Login", "Account");
+                TempData["InfoMessage"] = "Ürün detaylarını görmek için lütfen giriş yapın veya kayıt olun.";
+                return View(new ProductViewModel { Id = id }); // Boş model gönder, view'da kontrol edeceğiz
             }
 
             var product = await _catalogService.GetProductByIdAsync(id, token);
