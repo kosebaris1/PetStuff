@@ -32,8 +32,21 @@ else
             @if (Model.ImageUrls != null && Model.ImageUrls.Any())
             {
                 <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 2rem; display: flex; align-items: center; justify-content: center; min-height: 500px;">
-                    <img src="@Model.ImageUrls.First()" class="img-fluid" alt="@Model.Name" style="max-height: 500px; object-fit: contain; border-radius: 12px;" />
+                    <img id="mainProductImage" src="@Model.ImageUrls.First()" class="img-fluid" alt="@Model.Name" style="max-height: 500px; object-fit: contain; border-radius: 12px; cursor: pointer; transition: transform 0.3s ease;" />
                 </div>
+                @if (Model.ImageUrls.Count > 1)
+                {
+                    <div class="p-3" style="background: #ffffff; border-top: 1px solid #e2e8f0;">
+                        <div class="d-flex gap-2 overflow-auto" style="scrollbar-width: thin;">
+                            @foreach (var imageUrl in Model.ImageUrls)
+                            {
+                                <div class="product-thumbnail" style="min-width: 80px; width: 80px; height: 80px; border: 2px solid #e2e8f0; border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.3s ease; @(imageUrl == Model.ImageUrls.First() ? "border-color: #6366f1;" : "")" onclick="changeMainImage('@imageUrl', this)">
+                                    <img src="@imageUrl" class="w-100 h-100" style="object-fit: cover;" alt="Thumbnail" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
             }
             else
             {
@@ -148,6 +161,21 @@ else
 
 @section Scripts {
     <script>
+        function changeMainImage(imageUrl, thumbnailElement) {
+            // Ana resmi değiştir
+            document.getElementById('mainProductImage').src = imageUrl;
+            
+            // Tüm thumbnail'ların border'ını sıfırla
+            document.querySelectorAll('.product-thumbnail').forEach(thumb => {
+                thumb.style.borderColor = '#e2e8f0';
+            });
+            
+            // Tıklanan thumbnail'ın border'ını vurgula
+            if (thumbnailElement) {
+                thumbnailElement.style.borderColor = '#6366f1';
+            }
+        }
+
         document.getElementById('addToBasketForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
             

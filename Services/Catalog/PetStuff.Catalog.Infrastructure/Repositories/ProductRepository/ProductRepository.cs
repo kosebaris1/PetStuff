@@ -65,26 +65,33 @@ namespace PetStuff.Catalog.Infrastructure.Repositories.ProductRepository
             existingProduct.BrandId = product.BrandId;
             existingProduct.UpdatedDate = product.UpdatedDate;
 
-            // Image'ları güncelle - Önce mevcut image'ları sil
-            if (existingProduct.Images != null && existingProduct.Images.Any())
+            // Image'ları güncelle
+            // Eğer product.Images null ise, mevcut image'ları koru (değiştirme)
+            if (product.Images != null)
             {
-                _context.Set<ProductImage>().RemoveRange(existingProduct.Images);
-            }
-
-            // Yeni image'ları ekle
-            if (product.Images != null && product.Images.Any())
-            {
-                foreach (var image in product.Images)
+                // Önce mevcut image'ları sil
+                if (existingProduct.Images != null && existingProduct.Images.Any())
                 {
-                    existingProduct.Images ??= new List<ProductImage>();
-                    existingProduct.Images.Add(new ProductImage
+                    _context.Set<ProductImage>().RemoveRange(existingProduct.Images);
+                }
+
+                // Yeni image'ları ekle
+                if (product.Images.Any())
+                {
+                    existingProduct.Images = new List<ProductImage>();
+                    foreach (var image in product.Images)
                     {
-                        ImageUrl = image.ImageUrl,
-                        IsMain = image.IsMain,
-                        ProductId = existingProduct.Id
-                    });
+                        existingProduct.Images.Add(new ProductImage
+                        {
+                            ImageUrl = image.ImageUrl,
+                            IsMain = image.IsMain,
+                            ProductId = existingProduct.Id,
+                            CreatedDate = image.CreatedDate != default ? image.CreatedDate : DateTime.UtcNow
+                        });
+                    }
                 }
             }
+            // product.Images null ise, mevcut image'ları koru (hiçbir şey yapma)
 
             await _context.SaveChangesAsync();
         }

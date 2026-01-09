@@ -12,6 +12,9 @@ builder.Services.AddHttpClient<IBasketService, BasketService>();
 builder.Services.AddHttpClient<IOrderService, OrderService>();
 builder.Services.AddHttpClient<IIdentityService, IdentityService>();
 
+// File Upload Service
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+
 // Session for storing token
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

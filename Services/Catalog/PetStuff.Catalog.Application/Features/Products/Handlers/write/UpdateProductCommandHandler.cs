@@ -30,19 +30,12 @@ namespace PetStuff.Catalog.Application.Features.Products.Handlers.write
             product.BrandId = request.BrandId;
             product.UpdatedDate = DateTime.UtcNow;
 
-            // Update images if provided - Önce mevcut image'ları temizle, sonra yenilerini ekle
+            // Update images if provided
+            // ProductRepository zaten mevcut image'ları silecek, bu yüzden sadece yeni image'ları set et
             if (request.ImageUrls != null && request.ImageUrls.Any())
             {
-                // Mevcut image'ları temizle
-                if (product.Images != null && product.Images.Any())
-                {
-                    product.Images.Clear();
-                }
-                else
-                {
-                    product.Images = new List<ProductImage>();
-                }
-
+                product.Images = new List<ProductImage>();
+                
                 // Yeni image'ları ekle
                 for (int i = 0; i < request.ImageUrls.Count; i++)
                 {
@@ -53,18 +46,16 @@ namespace PetStuff.Catalog.Application.Features.Products.Handlers.write
                         {
                             ImageUrl = imageUrl,
                             IsMain = i == 0, // İlk resmi main yap
-                            ProductId = product.Id
+                            ProductId = product.Id,
+                            CreatedDate = DateTime.UtcNow
                         });
                     }
                 }
             }
             else
             {
-                // ImageUrls boşsa veya null ise, tüm image'ları temizle
-                if (product.Images != null)
-                {
-                    product.Images.Clear();
-                }
+                // ImageUrls null veya boşsa, mevcut image'ları koru (null set et, ProductRepository mevcut image'ları koruyacak)
+                product.Images = null;
             }
 
             await _repository.UpdateProductAsync(product);

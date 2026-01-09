@@ -11,11 +11,13 @@ namespace PetStuff.Web.Controllers
     {
         private readonly ICatalogService _catalogService;
         private readonly IOrderService _orderService;
+        private readonly IFileUploadService _fileUploadService;
 
-        public AdminController(ICatalogService catalogService, IOrderService orderService)
+        public AdminController(ICatalogService catalogService, IOrderService orderService, IFileUploadService fileUploadService)
         {
             _catalogService = catalogService;
             _orderService = orderService;
+            _fileUploadService = fileUploadService;
         }
 
         public async Task<IActionResult> Index()
@@ -77,16 +79,29 @@ namespace PetStuff.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Parse ImageUrls from textarea
+            // Upload product images from files
+            var imageUrls = new List<string>();
+            
+            // File upload'dan gelen resimleri yükle
+            if (Request.Form.Files != null && Request.Form.Files.Count > 0)
+            {
+                var uploadedUrls = await _fileUploadService.UploadProductImagesAsync(Request.Form.Files);
+                imageUrls.AddRange(uploadedUrls);
+            }
+
+            // Textarea'dan gelen URL'leri de ekle (eski yöntem - geriye dönük uyumluluk için)
             if (!string.IsNullOrEmpty(Request.Form["ImageUrls"]))
             {
                 var imageUrlsText = Request.Form["ImageUrls"].ToString();
-                model.ImageUrls = imageUrlsText
+                var textUrls = imageUrlsText
                     .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
                     .Where(url => !string.IsNullOrWhiteSpace(url))
                     .Select(url => url.Trim())
                     .ToList();
+                imageUrls.AddRange(textUrls);
             }
+
+            model.ImageUrls = imageUrls;
 
             var success = await _catalogService.CreateProductAsync(model, token);
 
@@ -118,16 +133,51 @@ namespace PetStuff.Web.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Parse ImageUrls from textarea
-            if (!string.IsNullOrEmpty(Request.Form["ImageUrls"]))
+            // Mevcut ürünü çek (mevcut image URL'lerini korumak için)
+            var existingProduct = await _catalogService.GetProductByIdAsync(id, token);
+            var imageUrls = new List<string>();
+
+            // Önce mevcut image'ları ekle (korunacak)
+            if (existingProduct?.ImageUrls != null && existingProduct.ImageUrls.Any())
+            {
+                imageUrls.AddRange(existingProduct.ImageUrls);
+            }
+
+            // Textarea'dan gelen URL'leri kontrol et
+            var hasTextareaUrls = !string.IsNullOrEmpty(Request.Form["ImageUrls"]);
+            var textareaUrls = new List<string>();
+            
+            if (hasTextareaUrls)
             {
                 var imageUrlsText = Request.Form["ImageUrls"].ToString();
-                model.ImageUrls = imageUrlsText
+                textareaUrls = imageUrlsText
                     .Split(new[] { "\r\n", "\n" }, StringSplitOptions.RemoveEmptyEntries)
                     .Where(url => !string.IsNullOrWhiteSpace(url))
                     .Select(url => url.Trim())
                     .ToList();
             }
+
+            // Eğer textarea'da URL'ler varsa, mevcut image'ları temizle ve textarea'dakileri kullan
+            // (Kullanıcı image'ları değiştirmek istiyor demektir)
+            if (hasTextareaUrls && textareaUrls.Any())
+            {
+                imageUrls.Clear();
+                imageUrls.AddRange(textareaUrls);
+            }
+
+            // File upload'dan gelen yeni resimleri ekle (her zaman eklenir, mevcut image'lara ek olarak)
+            if (Request.Form.Files != null && Request.Form.Files.Count > 0)
+            {
+                var uploadedUrls = await _fileUploadService.UploadProductImagesAsync(Request.Form.Files);
+                if (uploadedUrls.Any())
+                {
+                    // Eğer textarea boşsa, yeni dosyaları mevcut image'lara ekle
+                    // Eğer textarea doluysa, yeni dosyaları textarea'daki URL'lere ekle
+                    imageUrls.AddRange(uploadedUrls);
+                }
+            }
+
+            model.ImageUrls = imageUrls;
 
             var success = await _catalogService.UpdateProductAsync(id, model, token);
 

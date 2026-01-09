@@ -12,7 +12,7 @@
                 <h5 class="modal-title" id="addProductModalLabel"><i class="bi bi-plus-circle me-2"></i>Add New Product</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="addProductForm" method="post" asp-action="CreateProduct">
+            <form id="addProductForm" method="post" asp-action="CreateProduct" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <div class="modal-body">
                     <div class="row">
@@ -56,8 +56,14 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="productImages" class="form-label">Image URLs (one per line)</label>
+                        <label for="productImageFiles" class="form-label">Product Images *</label>
+                        <input type="file" class="form-control" id="productImageFiles" name="ImageFiles" multiple accept="image/*">
+                        <small class="form-text text-muted">You can select multiple images (JPG, PNG, GIF, WEBP - Max 5MB each)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="productImages" class="form-label">Or Image URLs (one per line) - Optional</label>
                         <textarea class="form-control" id="productImages" name="ImageUrls" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                        <small class="form-text text-muted">You can also add external image URLs here (optional)</small>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -79,7 +85,7 @@
                 <h5 class="modal-title" id="editProductModalLabel"><i class="bi bi-pencil me-2"></i>Edit Product</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="editProductForm" method="post" asp-action="UpdateProduct">
+            <form id="editProductForm" method="post" asp-action="UpdateProduct" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" id="editProductId" name="id" />
                 <div class="modal-body">
@@ -124,8 +130,14 @@
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="editProductImages" class="form-label">Image URLs (one per line)</label>
+                        <label for="editProductImageFiles" class="form-label">Add New Product Images</label>
+                        <input type="file" class="form-control" id="editProductImageFiles" name="ImageFiles" multiple accept="image/*">
+                        <small class="form-text text-muted">You can select multiple images to add (JPG, PNG, GIF, WEBP - Max 5MB each)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editProductImages" class="form-label">Or Image URLs (one per line) - Optional</label>
                         <textarea class="form-control" id="editProductImages" name="ImageUrls" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                        <small class="form-text text-muted">You can also add external image URLs here (optional). Existing images will be preserved.</small>
                     </div>
                 </div>
                 <div class="modal-footer">
