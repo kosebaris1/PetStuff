@@ -122,19 +122,19 @@
                                     @if (order.Status == "Pending")
                                     {
                                         <div class="btn-group" role="group">
-                                            <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi onaylamak istediğinize emin misiniz? Stok kontrolü yapılacak ve stok yetersizse sipariş iptal edilecektir.');">
+                                            <form asp-action="UpdateOrderStatus" method="post" class="d-inline" data-ajax="true">
                                                 <input type="hidden" name="id" value="@order.Id" />
                                                 <input type="hidden" name="status" value="Confirmed" />
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-sm btn-success">
+                                                <button type="submit" class="btn btn-sm btn-success" data-confirm="Siparişi onaylamak istediğinize emin misiniz? Stok kontrolü yapılacak ve stok yetersizse sipariş iptal edilecektir.">
                                                     <i class="bi bi-check-circle"></i> Approve
                                                 </button>
                                             </form>
-                                            <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi iptal etmek istediğinize emin misiniz?');">
+                                            <form asp-action="UpdateOrderStatus" method="post" class="d-inline" data-ajax="true">
                                                 <input type="hidden" name="id" value="@order.Id" />
                                                 <input type="hidden" name="status" value="Cancelled" />
                                                 @Html.AntiForgeryToken()
-                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                <button type="submit" class="btn btn-sm btn-danger" data-confirm="Siparişi iptal etmek istediğinize emin misiniz?">
                                                     <i class="bi bi-x-circle"></i> Cancel
                                                 </button>
                                             </form>
@@ -142,22 +142,22 @@
                                     }
                                     else if (order.Status == "Confirmed")
                                     {
-                                        <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi kargoya vermek istediğinize emin misiniz?');">
+                                        <form asp-action="UpdateOrderStatus" method="post" class="d-inline" data-ajax="true">
                                             <input type="hidden" name="id" value="@order.Id" />
                                             <input type="hidden" name="status" value="Shipped" />
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-info text-white">
+                                            <button type="submit" class="btn btn-sm btn-info text-white" data-confirm="Siparişi kargoya vermek istediğinize emin misiniz?">
                                                 <i class="bi bi-truck"></i> Ship
                                             </button>
                                         </form>
                                     }
                                     else if (order.Status == "Shipped")
                                     {
-                                        <form asp-action="UpdateOrderStatus" method="post" class="d-inline" onsubmit="return confirm('Siparişi teslim edildi olarak işaretlemek istediğinize emin misiniz?');">
+                                        <form asp-action="UpdateOrderStatus" method="post" class="d-inline" data-ajax="true">
                                             <input type="hidden" name="id" value="@order.Id" />
                                             <input type="hidden" name="status" value="Delivered" />
                                             @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm btn-success">
+                                            <button type="submit" class="btn btn-sm btn-success" data-confirm="Siparişi teslim edildi olarak işaretlemek istediğinize emin misiniz?">
                                                 <i class="bi bi-check-all"></i> Mark Delivered
                                             </button>
                                         </form>
@@ -236,6 +236,71 @@
                     
                     // Redraw table with new filter
                     table.draw();
+                });
+                
+                // Handle AJAX form submissions for status updates with modern confirm
+                $(document).on('submit', 'form[data-ajax="true"]', async function(e) {
+                    e.preventDefault();
+
+                    const form = $(this);
+                    const orderId = form.find('input[name="id"]').val();
+                    const status = form.find('input[name="status"]').val();
+                    const antiForgeryToken = form.find('input[name="__RequestVerificationToken"]').val();
+                    const submitButton = form.find('button[type="submit"]');
+                    const originalButtonHtml = submitButton.html();
+                    const confirmMessage = submitButton.data('confirm') || 'Bu işlemi yapmak istediğinize emin misiniz?';
+
+                    // Use modern confirm dialog
+                    const confirmed = await showConfirm(confirmMessage, 'Onay', 'Evet', 'Hayır');
+                    if (!confirmed) {
+                        return;
+                    }
+
+                    submitButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Yükleniyor...');
+                    
+                    console.log(`[INFO] Order Status Update Request - OrderId: ${orderId}, Status: ${status}`);
+
+                    try {
+                        const response = await fetch(form.attr('action'), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'RequestVerificationToken': antiForgeryToken
+                            },
+                            body: `id=${orderId}&status=${status}&__RequestVerificationToken=${antiForgeryToken}`
+                        });
+
+                        if (response.ok) {
+                            const responseText = await response.text();
+                            console.log(`[SUCCESS] Order ${orderId} status updated to ${status} successfully. Response: ${responseText}`);
+                            if (typeof showToast === 'function') {
+                                showToast('Sipariş durumu başarıyla güncellendi!', 'success');
+                            } else {
+                                alert('Sipariş durumu başarıyla güncellendi!');
+                            }
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            const errorText = await response.text();
+                            console.error(`[ERROR] Failed to update order ${orderId} status to ${status}`);
+                            console.error(`[ERROR] Status Code: ${response.status}`);
+                            console.error(`[ERROR] Error Message: ${errorText}`);
+                            if (typeof showToast === 'function') {
+                                showToast(`Sipariş durumu güncellenemedi: ${errorText}`, 'error', 5000);
+                            } else {
+                                alert(`Sipariş durumu güncellenemedi: ${errorText}`);
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`[ERROR] An unexpected error occurred during AJAX request for OrderId: ${orderId}, Status: ${status}`, error);
+                        if (typeof showToast === 'function') {
+                            showToast('Beklenmeyen bir hata oluştu.', 'error', 5000);
+                        } else {
+                            alert('Beklenmeyen bir hata oluştu.');
+                        }
+                    } finally {
+                        submitButton.prop('disabled', false).html(originalButtonHtml);
+                    }
                 });
             }
         });

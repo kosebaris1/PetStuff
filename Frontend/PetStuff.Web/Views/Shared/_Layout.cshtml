@@ -10,90 +10,399 @@
     <link rel="stylesheet" href="~/PetStuff.Web.styles.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
     <style>
+        @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
         :root {
-            --primary-color: #6c5ce7;
-            --secondary-color: #a29bfe;
-            --success-color: #00b894;
-            --danger-color: #d63031;
-            --warning-color: #fdcb6e;
-            --dark-color: #2d3436;
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary-color: #8b5cf6;
+            --accent-color: #ec4899;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --dark-color: #1e293b;
+            --dark-secondary: #334155;
+            --light-bg: #f8fafc;
+            --white: #ffffff;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-600: #475569;
+            --gray-800: #1e293b;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            color: var(--gray-800);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
+        /* Modern Navbar */
         .navbar {
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-lg);
             padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
         
         .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
+            font-weight: 800;
+            font-size: 1.75rem;
             color: white !important;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .navbar-nav .nav-link {
-            color: rgba(255,255,255,0.9) !important;
+            color: rgba(255, 255, 255, 0.95) !important;
             font-weight: 500;
-            margin: 0 0.5rem;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            margin: 0 0.25rem;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .navbar-nav .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: white;
+            transition: width 0.3s ease;
+        }
+        
+        .navbar-nav .nav-link:hover::before,
+        .navbar-nav .nav-link.active::before {
+            width: 80%;
         }
         
         .navbar-nav .nav-link:hover {
             color: white !important;
-            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
         }
         
         .navbar-nav .nav-link.active {
             color: white !important;
             font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Modern Buttons */
+        .btn {
+            font-weight: 600;
+            padding: 0.625rem 1.5rem;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            letter-spacing: 0.3px;
         }
         
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-            border: none;
-            transition: transform 0.2s ease;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
         }
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+            box-shadow: var(--shadow-lg);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
         }
         
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #059669 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Modern Cards */
         .card {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .card:hover::before {
+            opacity: 1;
         }
         
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-xl);
         }
         
-        .badge {
-            padding: 0.5em 0.75em;
-            font-weight: 500;
+        .card-body {
+            padding: 1.75rem;
         }
         
-        footer {
-            background: var(--dark-color);
-            color: white;
-            padding: 2rem 0;
-            margin-top: 3rem;
+        .card-title {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--gray-800);
+            margin-bottom: 0.75rem;
         }
         
+        /* Product Cards */
         .product-card {
             height: 100%;
+            cursor: pointer;
         }
         
         .product-card img {
-            border-radius: 10px 10px 0 0;
+            border-radius: 20px 20px 0 0;
+            transition: transform 0.4s ease;
+        }
+        
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Badges */
+        .badge {
+            padding: 0.5em 0.875em;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-radius: 8px;
+            letter-spacing: 0.3px;
+        }
+        
+        /* Alerts */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            border-left-color: var(--success-color);
+            color: #065f46;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border-left-color: var(--danger-color);
+            color: #991b1b;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left-color: var(--warning-color);
+            color: #92400e;
+        }
+        
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, var(--dark-color) 0%, var(--dark-secondary) 100%);
+            color: white;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        footer h5 {
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        footer a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        footer a:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* Main Content */
+        main {
+            min-height: calc(100vh - 200px);
+        }
+        
+        /* Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--gray-800);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+        }
+        
+        /* Form Controls */
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid var(--gray-200);
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        
+        /* Tables */
+        .table {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .table thead {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+        }
+        
+        .table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .table tbody tr:hover {
+            background: var(--gray-100);
+            transform: scale(1.01);
+        }
+        
+        /* Dropdown */
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 0.625rem 1rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        
+        .dropdown-item:hover {
+            background: var(--gray-100);
+            transform: translateX(4px);
+        }
+        
+        /* Animations */
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        /* Glassmorphism Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* Loading States */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+            border-width: 0.15em;
+        }
+        
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.75rem;
+            }
         }
     </style>
 </head>
@@ -228,6 +537,37 @@
         </div>
     </main>
 
+    <!-- Modern Toast Container -->
+    <div id="toastContainer" style="position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <!-- Modern Confirm Modal -->
+    <div id="confirmModal" class="modal fade" tabindex="-1" style="display: none;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 20px; border: none; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <div class="modal-title d-flex align-items-center">
+                        <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);">
+                            <i class="bi bi-question-circle text-white" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold" id="confirmModalTitle">Confirm Action</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-4 pb-4">
+                    <p class="mb-0" id="confirmModalMessage" style="font-size: 1rem; line-height: 1.6;"></p>
+                </div>
+                <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal" id="confirmModalCancel">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary px-4" id="confirmModalOk" style="font-weight: 600;">
+                        <i class="bi bi-check-circle me-2"></i>Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer>
         <div class="container">
             <div class="row">
@@ -273,5 +613,140 @@
         }
         
         @await RenderSectionAsync("Scripts", required: false)
+        
+        <script>
+            // Modern Toast Notification System
+            function showToast(message, type = 'info', duration = 3000) {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = 'toast-notification fade-in';
+                
+                const icons = {
+                    success: 'bi-check-circle-fill',
+                    error: 'bi-x-circle-fill',
+                    warning: 'bi-exclamation-triangle-fill',
+                    info: 'bi-info-circle-fill'
+                };
+                
+                const colors = {
+                    success: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    error: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                    warning: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                    info: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                };
+                
+                toast.style.cssText = `
+                    background: ${colors[type] || colors.info};
+                    color: white;
+                    padding: 1rem 1.5rem;
+                    border-radius: 12px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    min-width: 300px;
+                    max-width: 400px;
+                    animation: slideInRight 0.3s ease-out;
+                    font-weight: 500;
+                `;
+                
+                toast.innerHTML = `
+                    <i class="bi ${icons[type] || icons.info}" style="font-size: 1.25rem;"></i>
+                    <span style="flex: 1;">${message}</span>
+                    <button type="button" class="btn-close btn-close-white" onclick="this.parentElement.remove()" style="opacity: 0.8;"></button>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }, duration);
+            }
+            
+            // Modern Confirm Dialog
+            function showConfirm(message, title = 'Confirm Action', okText = 'Confirm', cancelText = 'Cancel') {
+                return new Promise((resolve) => {
+                    const modal = document.getElementById('confirmModal');
+                    const modalTitle = document.getElementById('confirmModalTitle');
+                    const modalMessage = document.getElementById('confirmModalMessage');
+                    const modalOk = document.getElementById('confirmModalOk');
+                    const modalCancel = document.getElementById('confirmModalCancel');
+                    const bsModal = new bootstrap.Modal(modal);
+                    
+                    modalTitle.textContent = title;
+                    modalMessage.textContent = message;
+                    modalOk.textContent = okText;
+                    modalCancel.textContent = cancelText;
+                    
+                    const handleOk = () => {
+                        bsModal.hide();
+                        resolve(true);
+                        modalOk.removeEventListener('click', handleOk);
+                        modalCancel.removeEventListener('click', handleCancel);
+                    };
+                    
+                    const handleCancel = () => {
+                        bsModal.hide();
+                        resolve(false);
+                        modalOk.removeEventListener('click', handleOk);
+                        modalCancel.removeEventListener('click', handleCancel);
+                    };
+                    
+                    modalOk.addEventListener('click', handleOk);
+                    modalCancel.addEventListener('click', handleCancel);
+                    
+                    modal.addEventListener('hidden.bs.modal', () => {
+                        resolve(false);
+                    }, { once: true });
+                    
+                    bsModal.show();
+                });
+            }
+            
+            // Replace default alert
+            window.originalAlert = window.alert;
+            window.alert = function(message) {
+                showToast(message, 'info', 4000);
+            };
+            
+            // Replace default confirm
+            window.originalConfirm = window.confirm;
+            window.confirm = function(message) {
+                return showConfirm(message, 'Confirm', 'OK', 'Cancel');
+            };
+            
+            // CSS Animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @@keyframes slideInRight {
+                    from {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                
+                @@keyframes slideOutRight {
+                    from {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                    to {
+                        transform: translateX(100%);
+                        opacity: 0;
+                    }
+                }
+                
+                .modal-backdrop {
+                    background-color: rgba(0, 0, 0, 0.5);
+                    backdrop-filter: blur(4px);
+                }
+            `;
+            document.head.appendChild(style);
+        </script>
 </body>
 </html>

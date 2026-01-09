@@ -3,68 +3,76 @@
     ViewData["Title"] = Model.Name;
 }
 
-<div class="mb-3">
-    <a asp-action="Index" class="text-decoration-none">
-        <i class="bi bi-arrow-left"></i> Back to Products
+<div class="mb-4 fade-in">
+    <a asp-action="Index" class="text-decoration-none fw-semibold" style="color: #6366f1;">
+        <i class="bi bi-arrow-left me-2"></i>Back to Products
     </a>
 </div>
 
-<div class="row">
+<div class="row g-4 fade-in">
     <div class="col-md-6">
-        <div class="card shadow-sm">
+        <div class="card" style="border-radius: 20px; overflow: hidden;">
             @if (Model.ImageUrls != null && Model.ImageUrls.Any())
             {
-                <img src="@Model.ImageUrls.First()" class="card-img-top" alt="@Model.Name" style="max-height: 500px; object-fit: contain; background: #f8f9fa;" />
+                <div style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); padding: 2rem; display: flex; align-items: center; justify-content: center; min-height: 500px;">
+                    <img src="@Model.ImageUrls.First()" class="img-fluid" alt="@Model.Name" style="max-height: 500px; object-fit: contain; border-radius: 12px;" />
+                </div>
             }
             else
             {
-                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
-                    <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                <div class="d-flex align-items-center justify-content-center" style="height: 500px; background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);">
+                    <i class="bi bi-image text-muted" style="font-size: 6rem;"></i>
                 </div>
             }
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card shadow-sm border-0 h-100">
-            <div class="card-body">
+        <div class="card h-100" style="border-radius: 20px;">
+            <div class="card-body p-4">
                 <div class="mb-3">
                     @if (Model.Category != null)
                     {
-                        <span class="badge bg-secondary me-2">@Model.Category.Name</span>
+                        <span class="badge me-2" style="background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            <i class="bi bi-tag me-1"></i>@Model.Category.Name
+                        </span>
                     }
                     @if (Model.Brand != null)
                     {
-                        <span class="badge bg-info">@Model.Brand.Name</span>
+                        <span class="badge" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; padding: 0.5rem 1rem; font-size: 0.875rem;">
+                            <i class="bi bi-star me-1"></i>@Model.Brand.Name
+                        </span>
                     }
                 </div>
                 
-                <h1 class="fw-bold mb-3">@Model.Name</h1>
+                <h1 class="fw-bold mb-3" style="font-size: 2.5rem; line-height: 1.2;">@Model.Name</h1>
                 
                 <div class="mb-4">
-                    <span class="h2 text-primary fw-bold">$@Model.Price.ToString("F2")</span>
+                    <span class="h2 fw-bold" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.5rem;">
+                        $@Model.Price.ToString("F2")
+                    </span>
                 </div>
                 
                 <div class="mb-4">
                     @if (Model.Stock > 0)
                     {
-                        <span class="badge bg-success mb-2">
-                            <i class="bi bi-check-circle"></i> In Stock (@Model.Stock available)
+                        <span class="badge bg-success mb-2" style="padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">
+                            <i class="bi bi-check-circle me-2"></i>In Stock (@Model.Stock available)
                         </span>
                     }
                     else
                     {
-                        <span class="badge bg-danger mb-2">
-                            <i class="bi bi-x-circle"></i> Out of Stock
+                        <span class="badge bg-danger mb-2" style="padding: 0.75rem 1.25rem; font-size: 0.95rem; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);">
+                            <i class="bi bi-x-circle me-2"></i>Out of Stock
                         </span>
                     }
                 </div>
                 
-                <hr />
+                <hr style="opacity: 0.2;" />
                 
-                <h5 class="fw-bold mb-3">Description</h5>
-                <p class="text-muted">@(Model.Description ?? "No description available.")</p>
+                <h5 class="fw-bold mb-3" style="color: #1e293b;">Description</h5>
+                <p class="text-muted fs-6" style="line-height: 1.8;">@(Model.Description ?? "No description available.")</p>
                 
-                <hr />
+                <hr style="opacity: 0.2;" />
                 
                 @if (Model.Stock > 0)
                 {
@@ -73,22 +81,26 @@
                         <input type="hidden" id="productName" value="@Model.Name" />
                         <input type="hidden" id="productPrice" value="@Model.Price" />
                         <input type="hidden" id="productImageUrl" value="@(Model.ImageUrls != null && Model.ImageUrls.Any() ? Model.ImageUrls.First() : "")" />
-                        <div class="mb-3">
-                            <label for="quantity" class="form-label fw-bold">Quantity</label>
-                            <div class="input-group" style="max-width: 200px;">
-                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('quantity').stepDown()">-</button>
-                                <input type="number" id="quantity" name="quantity" class="form-control text-center" value="1" min="1" max="@Model.Stock" />
-                                <button class="btn btn-outline-secondary" type="button" onclick="document.getElementById('quantity').stepUp()">+</button>
+                        <div class="mb-4">
+                            <label for="quantity" class="form-label fw-bold mb-3">Quantity</label>
+                            <div class="input-group" style="max-width: 220px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                                <button class="btn btn-outline-secondary border-0" type="button" onclick="document.getElementById('quantity').stepDown()" style="background: #f8fafc;">
+                                    <i class="bi bi-dash-lg"></i>
+                                </button>
+                                <input type="number" id="quantity" name="quantity" class="form-control text-center border-0" value="1" min="1" max="@Model.Stock" style="font-weight: 600; font-size: 1.1rem;" />
+                                <button class="btn btn-outline-secondary border-0" type="button" onclick="document.getElementById('quantity').stepUp()" style="background: #f8fafc;">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100">
+                        <button type="submit" class="btn btn-success btn-lg w-100 py-3" style="font-weight: 600; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
                             <i class="bi bi-cart-plus me-2"></i>Add to Basket
                         </button>
                     </form>
                 }
                 else
                 {
-                    <button class="btn btn-secondary btn-lg w-100" disabled>
+                    <button class="btn btn-secondary btn-lg w-100 py-3" disabled style="font-weight: 600; font-size: 1.1rem;">
                         <i class="bi bi-x-circle me-2"></i>Out of Stock
                     </button>
                 }
@@ -107,10 +119,21 @@
             const token = localStorage.getItem('accessToken');
             
             if (!token) {
-                alert('Please login to add items to basket.');
-                window.location.href = '/Account/Login';
+                if (typeof showToast === 'function') {
+                    showToast('Please login to add items to basket.', 'warning', 3000);
+                } else {
+                    alert('Please login to add items to basket.');
+                }
+                setTimeout(() => {
+                    window.location.href = '/Account/Login';
+                }, 1500);
                 return;
             }
+            
+            const submitButton = e.target.querySelector('button[type="submit"]');
+            const originalButtonHtml = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
             
             try {
                 // Sayfadaki hidden input'lardan ürün bilgilerini al
@@ -135,16 +158,31 @@
                 });
                 
                 if (response.ok) {
-                    alert('Product added to basket successfully!');
+                    if (typeof showToast === 'function') {
+                        showToast('Product added to basket successfully!', 'success', 3000);
+                    } else {
+                        alert('Product added to basket successfully!');
+                    }
                     // Optionally redirect to basket
                     // window.location.href = '/Basket';
                 } else {
                     const errorText = await response.text();
-                    alert('Failed to add product to basket: ' + errorText);
+                    if (typeof showToast === 'function') {
+                        showToast('Failed to add product to basket: ' + errorText, 'error', 4000);
+                    } else {
+                        alert('Failed to add product to basket: ' + errorText);
+                    }
                 }
             } catch (error) {
                 console.error('Error adding to basket:', error);
-                alert('An error occurred while adding the product to basket.');
+                if (typeof showToast === 'function') {
+                    showToast('An error occurred while adding the product to basket.', 'error', 4000);
+                } else {
+                    alert('An error occurred while adding the product to basket.');
+                }
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonHtml;
             }
         });
     </script>

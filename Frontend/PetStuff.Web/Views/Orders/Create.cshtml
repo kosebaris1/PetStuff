@@ -3,58 +3,88 @@
     ViewData["Title"] = "Checkout";
 }
 
-<h2>Checkout</h2>
-<hr />
+<div class="mb-4 fade-in">
+    <h2 class="fw-bold mb-1" style="font-size: 2.25rem;">
+        <i class="bi bi-cart-check me-2" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>Checkout
+    </h2>
+    <p class="text-muted">Complete your order information</p>
+</div>
 
-<div class="row">
+<div class="row g-4 fade-in">
     <div class="col-md-8">
-        <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            
-            <h4>Shipping Information</h4>
-            <div class="form-group mb-3">
-                <label asp-for="ShippingAddress" class="control-label">Address *</label>
-                <input asp-for="ShippingAddress" class="form-control" />
-                <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+        <div class="card" style="border-radius: 20px;">
+            <div class="card-header border-0 bg-white pt-4 px-4">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-truck me-2" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>Shipping Information
+                </h5>
             </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group mb-3">
-                        <label asp-for="ShippingCity" class="control-label">City</label>
-                        <input asp-for="ShippingCity" class="form-control" />
-                        <span asp-validation-for="ShippingCity" class="text-danger"></span>
+            <div class="card-body px-4 pb-4">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" style="border-radius: 12px;"></div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="ShippingAddress" class="form-label fw-semibold mb-2">
+                            <i class="bi bi-geo-alt me-2"></i>Address <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="ShippingAddress" class="form-control" placeholder="Enter your address" style="padding: 0.875rem 1rem;" />
+                        <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group mb-3">
-                        <label asp-for="ShippingZipCode" class="control-label">Zip Code</label>
-                        <input asp-for="ShippingZipCode" class="form-control" />
-                        <span asp-validation-for="ShippingZipCode" class="text-danger"></span>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label asp-for="ShippingCity" class="form-label fw-semibold mb-2">
+                                    <i class="bi bi-building me-2"></i>City
+                                </label>
+                                <input asp-for="ShippingCity" class="form-control" placeholder="Enter city" style="padding: 0.875rem 1rem;" />
+                                <span asp-validation-for="ShippingCity" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-4">
+                                <label asp-for="ShippingZipCode" class="form-label fw-semibold mb-2">
+                                    <i class="bi bi-postcard me-2"></i>Zip Code
+                                </label>
+                                <input asp-for="ShippingZipCode" class="form-control" placeholder="Enter zip code" style="padding: 0.875rem 1rem;" />
+                                <span asp-validation-for="ShippingZipCode" class="text-danger small"></span>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    
+                    <div class="mb-4">
+                        <label asp-for="ShippingCountry" class="form-label fw-semibold mb-2">
+                            <i class="bi bi-globe me-2"></i>Country
+                        </label>
+                        <input asp-for="ShippingCountry" class="form-control" placeholder="Enter country" style="padding: 0.875rem 1rem;" />
+                        <span asp-validation-for="ShippingCountry" class="text-danger small"></span>
+                    </div>
+                    
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg px-5 py-3" style="font-weight: 600; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                            <i class="bi bi-check-circle me-2"></i>Place Order
+                        </button>
+                        <a asp-controller="Basket" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Basket
+                        </a>
+                    </div>
+                </form>
             </div>
-            
-            <div class="form-group mb-3">
-                <label asp-for="ShippingCountry" class="control-label">Country</label>
-                <input asp-for="ShippingCountry" class="form-control" />
-                <span asp-validation-for="ShippingCountry" class="text-danger"></span>
-            </div>
-            
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success btn-lg">Place Order</button>
-                <a asp-controller="Basket" asp-action="Index" class="btn btn-secondary">Back to Basket</a>
-            </div>
-        </form>
+        </div>
     </div>
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5>Order Summary</h5>
+        <div class="card" style="border-radius: 20px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);">
+            <div class="card-header border-0 bg-white pt-4 px-4">
+                <h5 class="fw-bold mb-0">
+                    <i class="bi bi-receipt me-2" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;"></i>Order Summary
+                </h5>
             </div>
-            <div class="card-body">
-                <p class="text-muted">Items will be taken from your basket.</p>
-                <p class="text-muted">After placing the order, your basket will be cleared.</p>
+            <div class="card-body px-4 pb-4">
+                <div class="alert alert-info mb-3" style="border-radius: 12px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: none;">
+                    <i class="bi bi-info-circle me-2"></i>Items will be taken from your basket.
+                </div>
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-exclamation-circle me-2"></i>After placing the order, your basket will be cleared.
+                </p>
             </div>
         </div>
     </div>
